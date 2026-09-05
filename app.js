@@ -8,16 +8,15 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — EXPERIMENT V0.2.1
+// SEEK THE MASTER — EXPERIMENT V0.3
 // ==================================================
 //
 // Real businesses.
-// Match scores are prototype scores based on the
-// specificity and strength of evidence currently found.
+// Results are ranked by strength of evidence.
 //
-// The score is NOT a customer review score.
-// It represents how strongly the available evidence
-// matches the specific job being searched.
+// We intentionally avoid showing exact percentage scores
+// because this prototype does not yet have enough data
+// to justify that level of precision.
 //
 // ==================================================
 
@@ -28,10 +27,6 @@ const resultsSummary = document.getElementById("results-summary");
 
 const businesses = [
 
-  // =========================
-  // PORSCHE
-  // =========================
-
   {
     id: "nexus-auto-group",
     name: "Nexus Auto Group",
@@ -40,6 +35,7 @@ const businesses = [
 
     makes: ["porsche"],
     models: ["cayenne"],
+
     jobs: [
       "water pump",
       "cooling system",
@@ -50,9 +46,9 @@ const businesses = [
       "diagnostics"
     ],
 
-    baseMatch: 97,
+    baseScore: 97,
 
-    evidenceStrength: "HIGH",
+    evidenceStrength: "High",
 
     evidence: [
       "Porsche specifically listed",
@@ -63,7 +59,7 @@ const businesses = [
     ],
 
     why:
-      "Very strong match. Nexus specifically publishes Porsche repair services, names the Cayenne, and lists cooling-system work including water pumps, thermostats, radiators and coolant-related repairs.",
+      "Nexus publishes Porsche-specific repair information, names the Cayenne, and specifically lists cooling-system work including water pumps, thermostats and radiators.",
 
     website:
       "https://nexusautogroup.ca/porsche-repair-service",
@@ -80,6 +76,7 @@ const businesses = [
     category: "Porsche Specialist",
 
     makes: ["porsche"],
+
     models: [
       "cayenne",
       "911",
@@ -98,20 +95,20 @@ const businesses = [
       "diagnostics"
     ],
 
-    baseMatch: 93,
+    baseScore: 93,
 
-    evidenceStrength: "HIGH",
+    evidenceStrength: "High",
 
     evidence: [
       "Dedicated Porsche specialist",
-      "Services Porsche models and years",
+      "Porsche-specific repair services",
       "Cayenne services published",
-      "Water pumps discussed in Porsche maintenance material",
-      "Porsche-specific diagnostic equipment"
+      "Water-pump maintenance discussed",
+      "Porsche diagnostic equipment"
     ],
 
     why:
-      "Strong specialist match. Turn3 focuses heavily on Porsche service and publishes Porsche-specific repair and maintenance information.",
+      "Turn3 focuses heavily on Porsche service and publishes Porsche-specific repair and maintenance information, including Cayenne-related work.",
 
     website:
       "https://turn3autosport.com/porsche-service-repair/",
@@ -121,10 +118,6 @@ const businesses = [
   },
 
 
-  // =========================
-  // INFINITI
-  // =========================
-
   {
     id: "dales-auto",
     name: "Dale's Auto Service",
@@ -132,6 +125,7 @@ const businesses = [
     category: "Auto Repair",
 
     makes: ["infiniti"],
+
     models: [
       "g37",
       "q50",
@@ -150,9 +144,9 @@ const businesses = [
       "cooling system"
     ],
 
-    baseMatch: 96,
+    baseScore: 96,
 
-    evidenceStrength: "HIGH",
+    evidenceStrength: "High",
 
     evidence: [
       "Infiniti specifically listed",
@@ -164,7 +158,7 @@ const businesses = [
     ],
 
     why:
-      "Very strong match for a G37 owner because Dale's explicitly identifies the Infiniti G37 among the vehicles it services and publishes Infiniti-specific repair services.",
+      "Dale's specifically identifies the Infiniti G37 among the vehicles it services and publishes Infiniti-specific repair and diagnostic capabilities.",
 
     website:
       "https://dalesauto.ca/infiniti-service-repair-surrey/",
@@ -181,6 +175,7 @@ const businesses = [
     category: "Auto Repair",
 
     makes: ["infiniti"],
+
     models: [
       "g",
       "g37",
@@ -201,13 +196,13 @@ const businesses = [
       "maintenance"
     ],
 
-    baseMatch: 89,
+    baseScore: 89,
 
-    evidenceStrength: "MEDIUM-HIGH",
+    evidenceStrength: "Medium-High",
 
     evidence: [
       "Infiniti-specific service page",
-      "Infiniti G-series specifically mentioned",
+      "Infiniti G-series mentioned",
       "Diagnostics",
       "Cooling-system repairs",
       "Suspension and steering",
@@ -215,7 +210,7 @@ const businesses = [
     ],
 
     why:
-      "Good match. Norlang has a dedicated Infiniti service offering and specifically mentions Infiniti G-series vehicles. Its published services also include diagnostics, cooling systems, engine repairs and suspension work.",
+      "Norlang has a dedicated Infiniti service offering and specifically mentions Infiniti G-series vehicles, along with diagnostics, cooling-system and suspension work.",
 
     website:
       "https://norlangauto.ca/infiniti-service/",
@@ -253,8 +248,7 @@ function understandSearch(query) {
   }
 
 
-  // MODEL
-  // The model can imply the make.
+  // MODEL CAN IMPLY MAKE
 
   if (text.includes("cayenne")) {
     search.model = "cayenne";
@@ -302,9 +296,7 @@ function understandSearch(query) {
     search.job = "suspension";
   }
 
-  else if (
-    text.includes("transmission")
-  ) {
+  else if (text.includes("transmission")) {
     search.job = "transmission";
   }
 
@@ -323,9 +315,7 @@ function understandSearch(query) {
     search.job = "diagnostics";
   }
 
-  else if (
-    text.includes("engine")
-  ) {
+  else if (text.includes("engine")) {
     search.job = "engine";
   }
 
@@ -335,16 +325,15 @@ function understandSearch(query) {
 
 
 // --------------------------------------------------
-// CALCULATE MATCH SCORE
+// SCORE BUSINESS
 // --------------------------------------------------
 
-function calculateMatch(business, search) {
+function calculateScore(business, search) {
 
-  let score = business.baseMatch;
+  let score = business.baseScore;
 
 
-  // If we know the make and this shop does not
-  // match it, remove the shop completely.
+  // Exclude wrong make.
 
   if (
     search.make &&
@@ -354,7 +343,7 @@ function calculateMatch(business, search) {
   }
 
 
-  // Reward exact model evidence.
+  // MODEL
 
   if (search.model) {
 
@@ -372,11 +361,10 @@ function calculateMatch(business, search) {
     else {
       score -= 7;
     }
-
   }
 
 
-  // Reward exact job evidence.
+  // JOB
 
   if (search.job) {
 
@@ -385,16 +373,9 @@ function calculateMatch(business, search) {
     }
 
     else {
-      score -= 8;
+      score -= 10;
     }
-
   }
-
-
-  // Keep prototype scores within a reasonable range.
-
-  score = Math.min(score, 99);
-  score = Math.max(score, 55);
 
 
   return score;
@@ -402,13 +383,85 @@ function calculateMatch(business, search) {
 
 
 // --------------------------------------------------
-// PERFORM SEARCH
+// CONVERT SCORE TO HUMAN LABEL
+// --------------------------------------------------
+
+function getMatchLabel(score) {
+
+  if (score >= 95) {
+    return "Excellent match";
+  }
+
+  if (score >= 87) {
+    return "Strong match";
+  }
+
+  return "Possible match";
+}
+
+
+// --------------------------------------------------
+// FRIENDLY SEARCH INTERPRETATION
+// --------------------------------------------------
+
+function formatUnderstood(search, location) {
+
+  const items = [];
+
+
+  if (search.make) {
+
+    items.push(
+      search.make.charAt(0).toUpperCase() +
+      search.make.slice(1)
+    );
+  }
+
+
+  if (search.model) {
+
+    items.push(
+      search.model.toUpperCase()
+    );
+  }
+
+
+  if (search.job) {
+
+    const jobName =
+      search.job.charAt(0).toUpperCase() +
+      search.job.slice(1);
+
+    items.push(jobName);
+  }
+
+
+  if (location) {
+    items.push(location);
+  }
+
+
+  if (items.length === 0) {
+    return "We couldn't confidently identify the vehicle or job.";
+  }
+
+
+  return items.join(" · ");
+}
+
+
+// --------------------------------------------------
+// SEARCH
 // --------------------------------------------------
 
 function performSearch() {
 
-  const query = searchInput.value.trim();
-  const location = locationInput.value.trim();
+  const query =
+    searchInput.value.trim();
+
+  const location =
+    locationInput.value.trim();
+
 
   if (!query) {
     searchInput.focus();
@@ -416,29 +469,38 @@ function performSearch() {
   }
 
 
-  const understood = understandSearch(query);
+  const understood =
+    understandSearch(query);
 
 
-  let results = businesses
+  const results = businesses
     .map(business => {
 
-      const score = calculateMatch(
-        business,
-        understood
-      );
+      const score =
+        calculateScore(
+          business,
+          understood
+        );
+
 
       if (score === null) {
         return null;
       }
 
+
       return {
         ...business,
-        match: score
+        score,
+        matchLabel:
+          getMatchLabel(score)
       };
 
     })
     .filter(Boolean)
-    .sort((a, b) => b.match - a.match);
+    .sort(
+      (a, b) =>
+        b.score - a.score
+    );
 
 
   displayResults(
@@ -484,12 +546,58 @@ function displayResults(
   resultsContainer.innerHTML = "";
 
 
+  const understoodText =
+    formatUnderstood(
+      understood,
+      location
+    );
+
+
+  const interpretationBox =
+    document.createElement("div");
+
+  interpretationBox.className =
+    "result-card";
+
+  interpretationBox.innerHTML = `
+
+    <div
+      style="
+        font-size:12px;
+        color:#686868;
+        text-transform:uppercase;
+        letter-spacing:1px;
+        font-weight:700;
+        margin-bottom:6px;
+      "
+    >
+      We understood
+    </div>
+
+    <div
+      style="
+        font-size:18px;
+        font-weight:700;
+      "
+    >
+      ${understoodText}
+    </div>
+
+  `;
+
+
+  resultsContainer.appendChild(
+    interpretationBox
+  );
+
+
   if (results.length === 0) {
 
     resultsSummary.textContent =
       "No evidence-backed matches yet";
 
-    resultsContainer.innerHTML = `
+
+    resultsContainer.innerHTML += `
 
       <div class="result-card">
 
@@ -515,11 +623,16 @@ function displayResults(
 
     `;
 
-    resultsSection.classList.remove("hidden");
+
+    resultsSection.classList.remove(
+      "hidden"
+    );
+
 
     resultsSection.scrollIntoView({
       behavior: "smooth"
     });
+
 
     return;
   }
@@ -533,122 +646,150 @@ function displayResults(
     }`;
 
 
-  results.forEach(business => {
+  results.forEach(
+    business => {
 
-    const card = document.createElement("div");
+      const card =
+        document.createElement("div");
 
-    card.className = "result-card";
+      card.className =
+        "result-card";
 
 
-    card.innerHTML = `
+      card.innerHTML = `
 
-      <div class="result-top">
+        <div class="result-top">
 
-        <div>
+          <div>
 
-          <h3>
-            ${business.name}
-          </h3>
+            <h3>
+              ${business.name}
+            </h3>
 
-          <div class="business-location">
-            ${business.location}
-            ·
-            ${business.category}
+            <div class="business-location">
+              ${business.location}
+              ·
+              ${business.category}
+            </div>
+
+          </div>
+
+
+          <div class="match-score">
+
+            <div
+              style="
+                font-size:18px;
+                font-weight:800;
+              "
+            >
+              ${business.matchLabel}
+            </div>
+
+            <div class="match-label">
+              Job Match
+            </div>
+
           </div>
 
         </div>
 
 
-        <div class="match-score">
+        <div class="why">
 
-          <div class="match-number">
-            ${business.match}%
-          </div>
+          <strong>
+            Why this matches your job
+          </strong>
 
-          <div class="match-label">
-            Job Match
-          </div>
+          <p>
+            ${business.why}
+          </p>
 
         </div>
 
-      </div>
 
-
-      <div class="why">
-
-        <strong>
-          Why this matches your job
-        </strong>
-
-        <p>
-          ${business.why}
-        </p>
-
-      </div>
-
-
-      <div class="evidence">
-
-        ${business.evidence
-          .map(
-            item =>
-              `<span class="evidence-tag">
-                ✓ ${item}
-              </span>`
-          )
-          .join("")}
-
-      </div>
-
-
-      <div
-        style="
-          margin-top:18px;
-          font-size:12px;
-          color:#686868;
-        "
-      >
-
-        Evidence strength:
-        <strong>
-          ${business.evidenceStrength}
-        </strong>
-
-      </div>
-
-
-      <div class="result-actions">
-
-        <a
-          href="${business.website}"
-          target="_blank"
-          rel="noopener noreferrer"
-          onclick="trackBusinessClick('${business.name}')"
+        <div
+          style="
+            margin-top:20px;
+            font-size:13px;
+            font-weight:700;
+          "
         >
-          Visit business
-        </a>
+          Evidence we found
+        </div>
 
 
-        <a
-          href="${business.source}"
-          target="_blank"
-          rel="noopener noreferrer"
-          style="margin-left:8px;"
+        <div class="evidence">
+
+          ${business.evidence
+            .map(
+              item =>
+                `<span class="evidence-tag">
+                  ✓ ${item}
+                </span>`
+            )
+            .join("")}
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:18px;
+            font-size:12px;
+            color:#686868;
+          "
         >
-          See evidence
-        </a>
 
-      </div>
+          Evidence strength:
+          <strong>
+            ${business.evidenceStrength}
+          </strong>
 
-    `;
-
-
-    resultsContainer.appendChild(card);
-
-  });
+        </div>
 
 
-  resultsSection.classList.remove("hidden");
+        <div class="result-actions">
+
+          <a
+            href="${business.website}"
+            target="_blank"
+            rel="noopener noreferrer"
+            onclick="
+              trackBusinessClick(
+                '${business.name}'
+              )
+            "
+          >
+            Visit business
+          </a>
+
+
+          <a
+            href="${business.source}"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="margin-left:8px;"
+          >
+            See evidence
+          </a>
+
+        </div>
+
+      `;
+
+
+      resultsContainer.appendChild(
+        card
+      );
+
+    });
+
+
+  resultsSection.classList.remove(
+    "hidden"
+  );
+
 
   resultsSection.scrollIntoView({
     behavior: "smooth"
@@ -662,27 +803,34 @@ function displayResults(
 // --------------------------------------------------
 
 document
-  .querySelectorAll(".example-button")
-  .forEach(button => {
+  .querySelectorAll(
+    ".example-button"
+  )
+  .forEach(
+    button => {
 
-    button.addEventListener(
-      "click",
-      () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-        searchInput.value =
-          button.dataset.search;
+          searchInput.value =
+            button.dataset.search;
 
-        if (!locationInput.value) {
-          locationInput.value =
-            "Surrey, BC";
+
+          if (!locationInput.value) {
+
+            locationInput.value =
+              "Surrey, BC";
+          }
+
+
+          performSearch();
+
         }
+      );
 
-        performSearch();
-
-      }
-    );
-
-  });
+    }
+  );
 
 
 // --------------------------------------------------
@@ -695,8 +843,7 @@ searchButton.addEventListener(
 );
 
 
-// Enter performs search.
-// Shift + Enter creates a new line.
+// ENTER TO SEARCH
 
 searchInput.addEventListener(
   "keydown",
@@ -718,7 +865,7 @@ searchInput.addEventListener(
 
 
 // --------------------------------------------------
-// ANALYTICS
+// ANALYTICS PLACEHOLDERS
 // --------------------------------------------------
 
 function trackEvent(
@@ -754,7 +901,9 @@ function trackBusinessClick(
 // --------------------------------------------------
 
 const savedSearch =
-  localStorage.getItem("lastSearch");
+  localStorage.getItem(
+    "lastSearch"
+  );
 
 
 if (savedSearch) {
@@ -764,8 +913,10 @@ if (savedSearch) {
     const previous =
       JSON.parse(savedSearch);
 
+
     searchInput.value =
       previous.query || "";
+
 
     locationInput.value =
       previous.location || "";

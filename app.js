@@ -7,155 +7,463 @@ const resultsContainer = document.getElementById("results-container");
 const resultsSummary = document.getElementById("results-summary");
 
 
-// --------------------------------------------------
-// DEMO DATA
-// --------------------------------------------------
+// ==================================================
+// SEEK THE MASTER — EXPERIMENT V0.2
+// ==================================================
 //
-// These are fictional businesses for the prototype.
-// We will replace this with real businesses + evidence
-// once we build the actual research/database system.
+// Real businesses.
+// Match scores are prototype scores based on the
+// specificity and strength of evidence currently found.
 //
+// IMPORTANT:
+// The score is NOT a customer review score.
+// It represents how strongly the available evidence
+// matches the specific job being searched.
+//
+// ==================================================
 
-const demoBusinesses = [
+
+// --------------------------------------------------
+// BUSINESS DATABASE
+// --------------------------------------------------
+
+const businesses = [
+
+  // =========================
+  // PORSCHE
+  // =========================
+
   {
-    name: "North Shore European Auto",
+    id: "nexus-auto-group",
+    name: "Nexus Auto Group",
     location: "Surrey, BC",
-    category: "Automotive",
-    match: 96,
-    tags: [
-      "Porsche",
-      "Cayenne",
-      "958",
-      "4.8L V8",
-      "Cooling systems",
-      "Water pump"
+    category: "European Auto Repair",
+
+    makes: ["porsche"],
+    models: ["cayenne"],
+    jobs: [
+      "water pump",
+      "cooling system",
+      "coolant leak",
+      "overheating",
+      "thermostat",
+      "radiator",
+      "engine repair",
+      "diagnostics"
     ],
+
+    baseMatch: 97,
+
+    evidenceStrength: "HIGH",
+
+    evidence: [
+      "Porsche specifically listed",
+      "Cayenne specifically listed",
+      "Water pumps specifically listed",
+      "Cooling-system repairs specifically listed",
+      "Located in Surrey"
+    ],
+
     why:
-      "Strong match because the business specializes in European vehicles and has specific experience with Porsche Cayenne cooling-system repairs.",
-    website: "#"
+      "Very strong match. Nexus specifically publishes Porsche repair services, names the Cayenne, and lists cooling-system work including water pumps, thermostats, radiators and coolant-related repairs.",
+
+    sourceLabel: "View supporting evidence",
+
+    website:
+      "https://nexusautogroup.ca/porsche-repair-service",
+
+    source:
+      "https://nexusautogroup.ca/porsche-repair-service"
   },
 
+
   {
-    name: "Fraser Valley Performance",
+    id: "turn3-autosport",
+    name: "Turn3 Autosport",
     location: "Langley, BC",
-    category: "Automotive",
-    match: 88,
-    tags: [
-      "Porsche",
-      "European vehicles",
-      "Engine repair"
+    category: "Porsche Specialist",
+
+    makes: ["porsche"],
+    models: [
+      "cayenne",
+      "911",
+      "macan",
+      "boxster",
+      "cayman"
     ],
+
+    jobs: [
+      "water pump",
+      "maintenance",
+      "engine repair",
+      "transmission",
+      "brakes",
+      "diagnostics"
+    ],
+
+    baseMatch: 93,
+
+    evidenceStrength: "HIGH",
+
+    evidence: [
+      "Dedicated Porsche specialist",
+      "Services every Porsche model and year",
+      "Cayenne services published",
+      "Water pumps discussed in Porsche maintenance events",
+      "Porsche-specific diagnostic equipment"
+    ],
+
     why:
-      "Good overall match for Porsche mechanical work, although the available evidence is less specific to the Cayenne 958 water pump.",
-    website: "#"
+      "Strong specialist match. Turn3 focuses heavily on Porsche service and states that it services every Porsche model and year. Its published material also includes Cayenne services and Porsche water-pump maintenance.",
+
+    sourceLabel: "View supporting evidence",
+
+    website:
+      "https://turn3autosport.com/porsche-service-repair/",
+
+    source:
+      "https://turn3autosport.com/porsche-service-repair/"
   },
 
+
+  // =========================
+  // INFINITI
+  // =========================
+
   {
-    name: "West Coast Auto Specialists",
+    id: "dales-auto",
+    name: "Dale's Auto Service",
     location: "Surrey, BC",
-    category: "Automotive",
-    match: 79,
-    tags: [
-      "European vehicles",
-      "Cooling systems",
-      "Mechanical repair"
+    category: "Auto Repair",
+
+    makes: ["infiniti"],
+    models: [
+      "g37",
+      "q50",
+      "qx60",
+      "fx35"
     ],
+
+    jobs: [
+      "diagnostics",
+      "engine",
+      "brakes",
+      "suspension",
+      "steering",
+      "transmission",
+      "maintenance"
+    ],
+
+    baseMatch: 96,
+
+    evidenceStrength: "HIGH",
+
+    evidence: [
+      "Infiniti specifically listed",
+      "G37 specifically listed",
+      "Engine diagnostics",
+      "Suspension and steering",
+      "Transmission repair",
+      "Located in Surrey"
+    ],
+
     why:
-      "The shop performs cooling-system and mechanical repairs, but there is less evidence of Porsche Cayenne-specific experience.",
-    website: "#"
+      "Very strong match for a G37 owner because Dale's explicitly identifies the Infiniti G37 among the vehicles it services and publishes Infiniti-specific diagnostic, suspension, steering and transmission services.",
+
+    sourceLabel: "View supporting evidence",
+
+    website:
+      "https://dalesauto.ca/infiniti-service-repair-surrey/",
+
+    source:
+      "https://dalesauto.ca/infiniti-service-repair-surrey/"
+  },
+
+
+  {
+    id: "norlang-auto",
+    name: "Norlang Automotive",
+    location: "Langley, BC",
+    category: "Auto Repair",
+
+    makes: ["infiniti"],
+    models: [
+      "g",
+      "q50",
+      "q60",
+      "qx50",
+      "qx60"
+    ],
+
+    jobs: [
+      "diagnostics",
+      "cooling system",
+      "engine repair",
+      "brakes",
+      "suspension",
+      "steering",
+      "transmission",
+      "maintenance"
+    ],
+
+    baseMatch: 89,
+
+    evidenceStrength: "MEDIUM-HIGH",
+
+    evidence: [
+      "Infiniti-specific service page",
+      "Infiniti G-series specifically mentioned",
+      "Diagnostics",
+      "Cooling-system repairs",
+      "Suspension and steering",
+      "Located in Langley"
+    ],
+
+    why:
+      "Good match. Norlang has a dedicated Infiniti service offering and specifically mentions Infiniti G-series vehicles. Its published services also include diagnostics, cooling systems, engine repairs and suspension work.",
+
+    sourceLabel: "View supporting evidence",
+
+    website:
+      "https://norlangauto.ca/infiniti-service/",
+
+    source:
+      "https://norlangauto.ca/infiniti-service/"
   }
+
 ];
 
 
-const demoRoofBusinesses = [
-  {
-    name: "Fraser Valley Roof Care",
-    location: "Surrey, BC",
-    category: "Home Services",
-    match: 94,
-    tags: [
-      "Roof cleaning",
-      "Moss removal",
-      "Soft washing",
-      "Residential roofs"
-    ],
-    why:
-      "Strong match because roof cleaning and moss removal are specifically listed among the company's services.",
-    website: "#"
-  },
+// --------------------------------------------------
+// UNDERSTAND THE SEARCH
+// --------------------------------------------------
 
-  {
-    name: "Pacific Exterior Cleaning",
-    location: "Langley, BC",
-    category: "Home Services",
-    match: 86,
-    tags: [
-      "Pressure washing",
-      "Roof cleaning",
-      "Exterior cleaning"
-    ],
-    why:
-      "Good match because the business works on exterior surfaces and roofs, including roof cleaning.",
-    website: "#"
-  },
+function understandSearch(query) {
 
-  {
-    name: "Lower Mainland Pressure Washing",
-    location: "Surrey, BC",
-    category: "Home Services",
-    match: 72,
-    tags: [
-      "Pressure washing",
-      "Exterior cleaning"
-    ],
-    why:
-      "The company performs pressure washing, but there is less specific evidence that roof moss removal is a core service.",
-    website: "#"
+  const text = query.toLowerCase();
+
+  const search = {
+    make: null,
+    model: null,
+    job: null
+  };
+
+
+  // MAKE
+
+  if (text.includes("porsche")) {
+    search.make = "porsche";
   }
-];
+
+  if (text.includes("infiniti")) {
+    search.make = "infiniti";
+  }
+
+
+  // MODEL
+
+  if (text.includes("cayenne")) {
+    search.model = "cayenne";
+  }
+
+  if (text.includes("g37")) {
+    search.model = "g37";
+  }
+
+
+  // JOB / PROBLEM
+
+  if (
+    text.includes("water pump") ||
+    text.includes("waterpump")
+  ) {
+    search.job = "water pump";
+  }
+
+  else if (
+    text.includes("overheat") ||
+    text.includes("overheating") ||
+    text.includes("running hot")
+  ) {
+    search.job = "overheating";
+  }
+
+  else if (
+    text.includes("coolant") ||
+    text.includes("cooling")
+  ) {
+    search.job = "cooling system";
+  }
+
+  else if (
+    text.includes("suspension") ||
+    text.includes("shock") ||
+    text.includes("strut")
+  ) {
+    search.job = "suspension";
+  }
+
+  else if (
+    text.includes("transmission")
+  ) {
+    search.job = "transmission";
+  }
+
+  else if (
+    text.includes("brake")
+  ) {
+    search.job = "brakes";
+  }
+
+  else if (
+    text.includes("diagnostic") ||
+    text.includes("check engine") ||
+    text.includes("warning light")
+  ) {
+    search.job = "diagnostics";
+  }
+
+  else if (
+    text.includes("engine")
+  ) {
+    search.job = "engine";
+  }
+
+
+  return search;
+}
 
 
 // --------------------------------------------------
-// SEARCH
+// CALCULATE MATCH SCORE
+// --------------------------------------------------
+
+function calculateMatch(business, search) {
+
+  let score = business.baseMatch;
+
+
+  // Wrong make = exclude completely.
+
+  if (
+    search.make &&
+    !business.makes.includes(search.make)
+  ) {
+    return null;
+  }
+
+
+  // Reward exact model evidence.
+
+  if (search.model) {
+
+    if (business.models.includes(search.model)) {
+      score += 2;
+    }
+
+    else {
+
+      // Special handling:
+      // Norlang says Infiniti "G" series rather than G37.
+
+      if (
+        search.model === "g37" &&
+        business.models.includes("g")
+      ) {
+        score += 1;
+      }
+
+      else {
+        score -= 7;
+      }
+
+    }
+
+  }
+
+
+  // Reward exact job evidence.
+
+  if (search.job) {
+
+    if (business.jobs.includes(search.job)) {
+      score += 1;
+    }
+
+    else {
+      score -= 8;
+    }
+
+  }
+
+
+  // Keep score realistic.
+
+  score = Math.min(score, 99);
+  score = Math.max(score, 55);
+
+
+  return score;
+}
+
+
+// --------------------------------------------------
+// PERFORM SEARCH
 // --------------------------------------------------
 
 function performSearch() {
 
-  const query = searchInput.value.trim();
-  const location = locationInput.value.trim();
+  const query =
+    searchInput.value.trim();
+
+  const location =
+    locationInput.value.trim();
+
 
   if (!query) {
     searchInput.focus();
     return;
   }
 
-  const lowerQuery = query.toLowerCase();
 
-  let results;
+  const understood =
+    understandSearch(query);
 
-  if (
-    lowerQuery.includes("porsche") ||
-    lowerQuery.includes("cayenne") ||
-    lowerQuery.includes("water pump")
-  ) {
-    results = demoBusinesses;
-  }
 
-  else if (
-    lowerQuery.includes("roof") ||
-    lowerQuery.includes("moss") ||
-    lowerQuery.includes("pressure wash")
-  ) {
-    results = demoRoofBusinesses;
-  }
+  let results = businesses
+    .map(business => {
 
-  else {
-    results = demoBusinesses;
-  }
+      const score =
+        calculateMatch(
+          business,
+          understood
+        );
 
-  displayResults(results, location);
+      if (score === null) {
+        return null;
+      }
 
-  // Save the latest search locally.
+      return {
+        ...business,
+        match: score
+      };
+
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        b.match - a.match
+    );
+
+
+  displayResults(
+    results,
+    location,
+    query,
+    understood
+  );
+
+
   localStorage.setItem(
     "lastSearch",
     JSON.stringify({
@@ -164,12 +472,18 @@ function performSearch() {
     })
   );
 
-  // Analytics hook.
-  // Later this will send the search to Google Analytics.
-  console.log("Search performed:", {
-    query,
-    location
-  });
+
+  trackEvent(
+    "search",
+    {
+      query,
+      location,
+      make: understood.make,
+      model: understood.model,
+      job: understood.job
+    }
+  );
+
 }
 
 
@@ -177,104 +491,231 @@ function performSearch() {
 // DISPLAY RESULTS
 // --------------------------------------------------
 
-function displayResults(results, location) {
+function displayResults(
+  results,
+  location,
+  query,
+  understood
+) {
 
   resultsContainer.innerHTML = "";
 
-  resultsSummary.textContent =
-    `${results.length} potential matches${location ? ` near ${location}` : ""}`;
 
-  results.forEach((business) => {
+  if (results.length === 0) {
 
-    const card = document.createElement("div");
+    resultsSummary.textContent =
+      "No evidence-backed matches yet";
 
-    card.className = "result-card";
+    resultsContainer.innerHTML = `
 
-    card.innerHTML = `
-      <div class="result-top">
+      <div class="result-card">
 
-        <div>
-          <h3>${business.name}</h3>
+        <h3>
+          We don't have enough evidence yet.
+        </h3>
 
-          <div class="business-location">
-            ${business.location} · ${business.category}
-          </div>
+        <div class="why">
+
+          <strong>
+            This is actually useful feedback.
+          </strong>
+
+          <p>
+            Seek The Master currently has a small
+            experimental database. We haven't researched
+            enough businesses yet to confidently answer
+            this search.
+          </p>
+
         </div>
 
-        <div class="match-score">
-          <div class="match-number">
-            ${business.match}%
-          </div>
-
-          <div class="match-label">
-            Match
-          </div>
-        </div>
-
       </div>
 
-      <div class="why">
-
-        <strong>Why we recommend this business</strong>
-
-        <p>
-          ${business.why}
-        </p>
-
-      </div>
-
-      <div class="evidence">
-
-        ${business.tags
-          .map(tag => `<span class="evidence-tag">✓ ${tag}</span>`)
-          .join("")}
-
-      </div>
-
-      <div class="result-actions">
-
-        <a
-          href="${business.website}"
-          onclick="trackBusinessClick('${business.name}')"
-        >
-          View business
-        </a>
-
-      </div>
     `;
 
-    resultsContainer.appendChild(card);
-  });
+    resultsSection.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
 
 
-  resultsSection.classList.remove("hidden");
+  resultsSummary.textContent =
+    `${results.length} evidence-backed matches${
+      location
+        ? ` near ${location}`
+        : ""
+    }`;
+
+
+  results.forEach(
+    business => {
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "result-card";
+
+
+      card.innerHTML = `
+
+        <div class="result-top">
+
+          <div>
+
+            <h3>
+              ${business.name}
+            </h3>
+
+            <div class="business-location">
+              ${business.location}
+              ·
+              ${business.category}
+            </div>
+
+          </div>
+
+
+          <div class="match-score">
+
+            <div class="match-number">
+              ${business.match}%
+            </div>
+
+            <div class="match-label">
+              Job Match
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="why">
+
+          <strong>
+            Why this matches your job
+          </strong>
+
+          <p>
+            ${business.why}
+          </p>
+
+        </div>
+
+
+        <div class="evidence">
+
+          ${business.evidence
+            .map(
+              item =>
+                `<span class="evidence-tag">
+                  ✓ ${item}
+                </span>`
+            )
+            .join("")}
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:18px;
+            font-size:12px;
+            color:#686868;
+          "
+        >
+
+          Evidence strength:
+          <strong>
+            ${business.evidenceStrength}
+          </strong>
+
+        </div>
+
+
+        <div class="result-actions">
+
+          <a
+            href="${business.website}"
+            target="_blank"
+            rel="noopener noreferrer"
+            onclick="
+              trackBusinessClick(
+                '${business.name}'
+              )
+            "
+          >
+            Visit business
+          </a>
+
+
+          <a
+            href="${business.source}"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="margin-left:8px;"
+          >
+            See evidence
+          </a>
+
+        </div>
+
+      `;
+
+
+      resultsContainer.appendChild(
+        card
+      );
+
+    });
+
+
+  resultsSection.classList.remove(
+    "hidden"
+  );
+
 
   resultsSection.scrollIntoView({
     behavior: "smooth"
   });
+
 }
 
 
 // --------------------------------------------------
-// EXAMPLE SEARCH BUTTONS
+// EXAMPLE BUTTONS
 // --------------------------------------------------
 
-document.querySelectorAll(".example-button").forEach(button => {
+document
+  .querySelectorAll(
+    ".example-button"
+  )
+  .forEach(
+    button => {
 
-  button.addEventListener("click", () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-    searchInput.value =
-      button.dataset.search;
+          searchInput.value =
+            button.dataset.search;
 
-    if (!locationInput.value) {
-      locationInput.value = "Surrey, BC";
+          if (!locationInput.value) {
+            locationInput.value =
+              "Surrey, BC";
+          }
+
+          performSearch();
+
+        }
+      );
+
     }
-
-    performSearch();
-
-  });
-
-});
+  );
 
 
 // --------------------------------------------------
@@ -287,34 +728,61 @@ searchButton.addEventListener(
 );
 
 
-// Allow Enter to search.
-// Shift + Enter still creates a new line.
+// Enter performs search.
+// Shift + Enter creates new line.
 
-searchInput.addEventListener("keydown", event => {
+searchInput.addEventListener(
+  "keydown",
+  event => {
 
-  if (
-    event.key === "Enter" &&
-    !event.shiftKey
-  ) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
 
-    event.preventDefault();
+      event.preventDefault();
 
-    performSearch();
+      performSearch();
+
+    }
 
   }
-
-});
+);
 
 
 // --------------------------------------------------
-// BUSINESS CLICK TRACKING
+// ANALYTICS
 // --------------------------------------------------
 
-function trackBusinessClick(businessName) {
+function trackEvent(
+  eventName,
+  eventData
+) {
 
   console.log(
-    "Business clicked:",
-    businessName
+    "Seek The Master Event:",
+    eventName,
+    eventData
+  );
+
+
+  // Later, when Google Analytics
+  // is installed, we'll send
+  // events from here.
+
+}
+
+
+function trackBusinessClick(
+  businessName
+) {
+
+  trackEvent(
+    "business_click",
+    {
+      business:
+        businessName
+    }
   );
 
 }
@@ -325,7 +793,10 @@ function trackBusinessClick(businessName) {
 // --------------------------------------------------
 
 const savedSearch =
-  localStorage.getItem("lastSearch");
+  localStorage.getItem(
+    "lastSearch"
+  );
+
 
 if (savedSearch) {
 

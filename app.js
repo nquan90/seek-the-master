@@ -8,14 +8,13 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — EXPERIMENT V0.2
+// SEEK THE MASTER — EXPERIMENT V0.2.1
 // ==================================================
 //
 // Real businesses.
 // Match scores are prototype scores based on the
 // specificity and strength of evidence currently found.
 //
-// IMPORTANT:
 // The score is NOT a customer review score.
 // It represents how strongly the available evidence
 // matches the specific job being searched.
@@ -45,7 +44,6 @@ const businesses = [
       "water pump",
       "cooling system",
       "coolant leak",
-      "overheating",
       "thermostat",
       "radiator",
       "engine repair",
@@ -66,8 +64,6 @@ const businesses = [
 
     why:
       "Very strong match. Nexus specifically publishes Porsche repair services, names the Cayenne, and lists cooling-system work including water pumps, thermostats, radiators and coolant-related repairs.",
-
-    sourceLabel: "View supporting evidence",
 
     website:
       "https://nexusautogroup.ca/porsche-repair-service",
@@ -94,6 +90,7 @@ const businesses = [
 
     jobs: [
       "water pump",
+      "cooling system",
       "maintenance",
       "engine repair",
       "transmission",
@@ -107,16 +104,14 @@ const businesses = [
 
     evidence: [
       "Dedicated Porsche specialist",
-      "Services every Porsche model and year",
+      "Services Porsche models and years",
       "Cayenne services published",
-      "Water pumps discussed in Porsche maintenance events",
+      "Water pumps discussed in Porsche maintenance material",
       "Porsche-specific diagnostic equipment"
     ],
 
     why:
-      "Strong specialist match. Turn3 focuses heavily on Porsche service and states that it services every Porsche model and year. Its published material also includes Cayenne services and Porsche water-pump maintenance.",
-
-    sourceLabel: "View supporting evidence",
+      "Strong specialist match. Turn3 focuses heavily on Porsche service and publishes Porsche-specific repair and maintenance information.",
 
     website:
       "https://turn3autosport.com/porsche-service-repair/",
@@ -151,7 +146,8 @@ const businesses = [
       "suspension",
       "steering",
       "transmission",
-      "maintenance"
+      "maintenance",
+      "cooling system"
     ],
 
     baseMatch: 96,
@@ -168,9 +164,7 @@ const businesses = [
     ],
 
     why:
-      "Very strong match for a G37 owner because Dale's explicitly identifies the Infiniti G37 among the vehicles it services and publishes Infiniti-specific diagnostic, suspension, steering and transmission services.",
-
-    sourceLabel: "View supporting evidence",
+      "Very strong match for a G37 owner because Dale's explicitly identifies the Infiniti G37 among the vehicles it services and publishes Infiniti-specific repair services.",
 
     website:
       "https://dalesauto.ca/infiniti-service-repair-surrey/",
@@ -189,6 +183,7 @@ const businesses = [
     makes: ["infiniti"],
     models: [
       "g",
+      "g37",
       "q50",
       "q60",
       "qx50",
@@ -221,8 +216,6 @@ const businesses = [
 
     why:
       "Good match. Norlang has a dedicated Infiniti service offering and specifically mentions Infiniti G-series vehicles. Its published services also include diagnostics, cooling systems, engine repairs and suspension work.",
-
-    sourceLabel: "View supporting evidence",
 
     website:
       "https://norlangauto.ca/infiniti-service/",
@@ -261,13 +254,16 @@ function understandSearch(query) {
 
 
   // MODEL
+  // The model can imply the make.
 
   if (text.includes("cayenne")) {
     search.model = "cayenne";
+    search.make = "porsche";
   }
 
   if (text.includes("g37")) {
     search.model = "g37";
+    search.make = "infiniti";
   }
 
 
@@ -283,9 +279,10 @@ function understandSearch(query) {
   else if (
     text.includes("overheat") ||
     text.includes("overheating") ||
-    text.includes("running hot")
+    text.includes("running hot") ||
+    text.includes("losing coolant")
   ) {
-    search.job = "overheating";
+    search.job = "cooling system";
   }
 
   else if (
@@ -298,7 +295,9 @@ function understandSearch(query) {
   else if (
     text.includes("suspension") ||
     text.includes("shock") ||
-    text.includes("strut")
+    text.includes("shocks") ||
+    text.includes("strut") ||
+    text.includes("struts")
   ) {
     search.job = "suspension";
   }
@@ -310,7 +309,8 @@ function understandSearch(query) {
   }
 
   else if (
-    text.includes("brake")
+    text.includes("brake") ||
+    text.includes("brakes")
   ) {
     search.job = "brakes";
   }
@@ -343,7 +343,8 @@ function calculateMatch(business, search) {
   let score = business.baseMatch;
 
 
-  // Wrong make = exclude completely.
+  // If we know the make and this shop does not
+  // match it, remove the shop completely.
 
   if (
     search.make &&
@@ -361,22 +362,15 @@ function calculateMatch(business, search) {
       score += 2;
     }
 
+    else if (
+      search.model === "g37" &&
+      business.models.includes("g")
+    ) {
+      score += 1;
+    }
+
     else {
-
-      // Special handling:
-      // Norlang says Infiniti "G" series rather than G37.
-
-      if (
-        search.model === "g37" &&
-        business.models.includes("g")
-      ) {
-        score += 1;
-      }
-
-      else {
-        score -= 7;
-      }
-
+      score -= 7;
     }
 
   }
@@ -397,7 +391,7 @@ function calculateMatch(business, search) {
   }
 
 
-  // Keep score realistic.
+  // Keep prototype scores within a reasonable range.
 
   score = Math.min(score, 99);
   score = Math.max(score, 55);
@@ -413,12 +407,8 @@ function calculateMatch(business, search) {
 
 function performSearch() {
 
-  const query =
-    searchInput.value.trim();
-
-  const location =
-    locationInput.value.trim();
-
+  const query = searchInput.value.trim();
+  const location = locationInput.value.trim();
 
   if (!query) {
     searchInput.focus();
@@ -426,18 +416,16 @@ function performSearch() {
   }
 
 
-  const understood =
-    understandSearch(query);
+  const understood = understandSearch(query);
 
 
   let results = businesses
     .map(business => {
 
-      const score =
-        calculateMatch(
-          business,
-          understood
-        );
+      const score = calculateMatch(
+        business,
+        understood
+      );
 
       if (score === null) {
         return null;
@@ -450,16 +438,12 @@ function performSearch() {
 
     })
     .filter(Boolean)
-    .sort(
-      (a, b) =>
-        b.match - a.match
-    );
+    .sort((a, b) => b.match - a.match);
 
 
   displayResults(
     results,
     location,
-    query,
     understood
   );
 
@@ -494,7 +478,6 @@ function performSearch() {
 function displayResults(
   results,
   location,
-  query,
   understood
 ) {
 
@@ -517,14 +500,13 @@ function displayResults(
         <div class="why">
 
           <strong>
-            This is actually useful feedback.
+            This search is outside our current test database.
           </strong>
 
           <p>
-            Seek The Master currently has a small
-            experimental database. We haven't researched
-            enough businesses yet to confidently answer
-            this search.
+            Seek The Master is currently running a small
+            experiment. We only want to recommend businesses
+            when we have enough evidence to support the match.
           </p>
 
         </div>
@@ -533,12 +515,13 @@ function displayResults(
 
     `;
 
-    resultsSection.classList.remove(
-      "hidden"
-    );
+    resultsSection.classList.remove("hidden");
+
+    resultsSection.scrollIntoView({
+      behavior: "smooth"
+    });
 
     return;
-
   }
 
 
@@ -550,134 +533,122 @@ function displayResults(
     }`;
 
 
-  results.forEach(
-    business => {
+  results.forEach(business => {
 
-      const card =
-        document.createElement("div");
+    const card = document.createElement("div");
 
-      card.className =
-        "result-card";
+    card.className = "result-card";
 
 
-      card.innerHTML = `
+    card.innerHTML = `
 
-        <div class="result-top">
+      <div class="result-top">
 
-          <div>
+        <div>
 
-            <h3>
-              ${business.name}
-            </h3>
+          <h3>
+            ${business.name}
+          </h3>
 
-            <div class="business-location">
-              ${business.location}
-              ·
-              ${business.category}
-            </div>
-
-          </div>
-
-
-          <div class="match-score">
-
-            <div class="match-number">
-              ${business.match}%
-            </div>
-
-            <div class="match-label">
-              Job Match
-            </div>
-
+          <div class="business-location">
+            ${business.location}
+            ·
+            ${business.category}
           </div>
 
         </div>
 
 
-        <div class="why">
+        <div class="match-score">
 
-          <strong>
-            Why this matches your job
-          </strong>
+          <div class="match-number">
+            ${business.match}%
+          </div>
 
-          <p>
-            ${business.why}
-          </p>
-
-        </div>
-
-
-        <div class="evidence">
-
-          ${business.evidence
-            .map(
-              item =>
-                `<span class="evidence-tag">
-                  ✓ ${item}
-                </span>`
-            )
-            .join("")}
+          <div class="match-label">
+            Job Match
+          </div>
 
         </div>
 
+      </div>
 
-        <div
-          style="
-            margin-top:18px;
-            font-size:12px;
-            color:#686868;
-          "
+
+      <div class="why">
+
+        <strong>
+          Why this matches your job
+        </strong>
+
+        <p>
+          ${business.why}
+        </p>
+
+      </div>
+
+
+      <div class="evidence">
+
+        ${business.evidence
+          .map(
+            item =>
+              `<span class="evidence-tag">
+                ✓ ${item}
+              </span>`
+          )
+          .join("")}
+
+      </div>
+
+
+      <div
+        style="
+          margin-top:18px;
+          font-size:12px;
+          color:#686868;
+        "
+      >
+
+        Evidence strength:
+        <strong>
+          ${business.evidenceStrength}
+        </strong>
+
+      </div>
+
+
+      <div class="result-actions">
+
+        <a
+          href="${business.website}"
+          target="_blank"
+          rel="noopener noreferrer"
+          onclick="trackBusinessClick('${business.name}')"
         >
-
-          Evidence strength:
-          <strong>
-            ${business.evidenceStrength}
-          </strong>
-
-        </div>
+          Visit business
+        </a>
 
 
-        <div class="result-actions">
+        <a
+          href="${business.source}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="margin-left:8px;"
+        >
+          See evidence
+        </a>
 
-          <a
-            href="${business.website}"
-            target="_blank"
-            rel="noopener noreferrer"
-            onclick="
-              trackBusinessClick(
-                '${business.name}'
-              )
-            "
-          >
-            Visit business
-          </a>
+      </div>
+
+    `;
 
 
-          <a
-            href="${business.source}"
-            target="_blank"
-            rel="noopener noreferrer"
-            style="margin-left:8px;"
-          >
-            See evidence
-          </a>
+    resultsContainer.appendChild(card);
 
-        </div>
-
-      `;
+  });
 
 
-      resultsContainer.appendChild(
-        card
-      );
-
-    });
-
-
-  resultsSection.classList.remove(
-    "hidden"
-  );
-
+  resultsSection.classList.remove("hidden");
 
   resultsSection.scrollIntoView({
     behavior: "smooth"
@@ -691,31 +662,27 @@ function displayResults(
 // --------------------------------------------------
 
 document
-  .querySelectorAll(
-    ".example-button"
-  )
-  .forEach(
-    button => {
+  .querySelectorAll(".example-button")
+  .forEach(button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-          searchInput.value =
-            button.dataset.search;
+        searchInput.value =
+          button.dataset.search;
 
-          if (!locationInput.value) {
-            locationInput.value =
-              "Surrey, BC";
-          }
-
-          performSearch();
-
+        if (!locationInput.value) {
+          locationInput.value =
+            "Surrey, BC";
         }
-      );
 
-    }
-  );
+        performSearch();
+
+      }
+    );
+
+  });
 
 
 // --------------------------------------------------
@@ -729,7 +696,7 @@ searchButton.addEventListener(
 
 
 // Enter performs search.
-// Shift + Enter creates new line.
+// Shift + Enter creates a new line.
 
 searchInput.addEventListener(
   "keydown",
@@ -765,11 +732,6 @@ function trackEvent(
     eventData
   );
 
-
-  // Later, when Google Analytics
-  // is installed, we'll send
-  // events from here.
-
 }
 
 
@@ -780,8 +742,7 @@ function trackBusinessClick(
   trackEvent(
     "business_click",
     {
-      business:
-        businessName
+      business: businessName
     }
   );
 
@@ -793,9 +754,7 @@ function trackBusinessClick(
 // --------------------------------------------------
 
 const savedSearch =
-  localStorage.getItem(
-    "lastSearch"
-  );
+  localStorage.getItem("lastSearch");
 
 
 if (savedSearch) {

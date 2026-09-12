@@ -8,22 +8,17 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — EXPERIMENT V0.4
+// SEEK THE MASTER — EXPERIMENT V0.5
 // ==================================================
 //
-// Major change:
+// Changes in V0.5:
 //
-// A business can now have multiple vehicle-specific
-// evidence profiles.
-//
-// Example:
-//
-// Dale's Auto Service
-//   -> Infiniti profile
-//   -> Porsche profile
-//
-// Evidence from one profile is NEVER automatically
-// used to support another.
+// - Expanded real business dataset
+// - Added dealer/specialist benchmark results
+// - Added basic location relevance
+// - Evidence remains separated by vehicle make
+// - Exact model/job evidence ranks above generic
+//   brand-level experience
 //
 // ==================================================
 
@@ -45,6 +40,8 @@ const businesses = [
 
     location: "Surrey, BC",
 
+    city: "surrey",
+
     category: "European Auto Repair",
 
     profiles: {
@@ -61,23 +58,29 @@ const businesses = [
           "thermostat",
           "radiator",
           "engine repair",
-          "diagnostics"
+          "diagnostics",
+          "suspension",
+          "steering",
+          "brakes",
+          "maintenance"
         ],
 
-        baseScore: 97,
+        baseScore: 94,
 
         evidenceStrength: "High",
 
         evidence: [
           "Porsche-specific repair information",
-          "Cayenne specifically listed",
-          "Water pumps specifically listed",
-          "Cooling-system repair specifically listed",
+          "Cayenne specifically referenced",
+          "Water-pump failures specifically referenced",
+          "Cooling-system repairs specifically listed",
+          "Cayenne air-suspension work referenced",
+          "Porsche-compatible diagnostic equipment",
           "Located in Surrey"
         ],
 
         why:
-          "Nexus publishes Porsche-specific repair information, identifies the Cayenne, and specifically lists cooling-system work including water pumps, thermostats and radiators.",
+          "Nexus publishes unusually specific Porsche repair information. Its material identifies the Cayenne and specifically discusses cooling-system repairs, water pumps, suspension work and Porsche diagnostics.",
 
         source:
           "https://nexusautogroup.ca/porsche-repair-service"
@@ -101,6 +104,8 @@ const businesses = [
 
     location: "Langley, BC",
 
+    city: "langley",
+
     category: "Porsche Specialist",
 
     profiles: {
@@ -122,7 +127,9 @@ const businesses = [
           "engine repair",
           "transmission",
           "brakes",
-          "diagnostics"
+          "diagnostics",
+          "suspension",
+          "steering"
         ],
 
         baseScore: 93,
@@ -131,14 +138,15 @@ const businesses = [
 
         evidence: [
           "Dedicated Porsche specialist",
-          "Porsche-specific repair services",
-          "Cayenne-related services published",
-          "Porsche maintenance expertise",
-          "Porsche diagnostic equipment"
+          "Services Porsche models across model years",
+          "Porsche-specific diagnostic equipment",
+          "Engine and gearbox repair capability",
+          "Suspension and steering repair capability",
+          "Longstanding Lower Mainland Porsche focus"
         ],
 
         why:
-          "Turn3 focuses heavily on Porsche repair and maintenance and provides Porsche-specific service capabilities rather than general European-only experience.",
+          "Turn3 is a dedicated Porsche-focused shop rather than a general repair facility. It publishes broad Porsche repair capability including diagnostics, suspension, brakes, engines and gearboxes.",
 
         source:
           "https://turn3autosport.com/porsche-service-repair/"
@@ -162,12 +170,14 @@ const businesses = [
 
     location: "Surrey, BC",
 
+    city: "surrey",
+
     category: "Independent Auto Repair",
 
     profiles: {
 
       // ----------------------------------------------
-      // INFINITI PROFILE
+      // INFINITI
       // ----------------------------------------------
 
       infiniti: {
@@ -193,22 +203,22 @@ const businesses = [
           "cooling system"
         ],
 
-        baseScore: 96,
+        baseScore: 94,
 
         evidenceStrength: "High",
 
         evidence: [
           "Dedicated Infiniti service information",
           "G37 specifically identified",
-          "Engine diagnostics",
-          "Suspension and steering service",
+          "Infiniti engine diagnostics",
+          "Suspension and steering services",
           "Transmission repair",
           "Cooling-system service",
           "Located in Surrey"
         ],
 
         why:
-          "Dale's publishes dedicated Infiniti service information and specifically identifies the G37. Its Infiniti services include diagnostics, suspension, steering, transmission and cooling-system work.",
+          "Dale's publishes dedicated Infiniti service information and specifically identifies the G37. It also lists cooling-system, diagnostic, suspension, steering and transmission services.",
 
         source:
           "https://dalesauto.ca/infiniti-service-repair-surrey/"
@@ -216,7 +226,7 @@ const businesses = [
 
 
       // ----------------------------------------------
-      // PORSCHE PROFILE
+      // PORSCHE
       // ----------------------------------------------
 
       porsche: {
@@ -241,24 +251,24 @@ const businesses = [
           "transmission"
         ],
 
-        baseScore: 87,
+        baseScore: 84,
 
         evidenceStrength: "Medium-High",
 
         evidence: [
-          "Dedicated Porsche service information",
-          "Cayenne specifically identified",
+          "Porsche service information",
+          "Cayenne identified",
           "Porsche diagnostics",
-          "Porsche brake service",
+          "Suspension and steering capability",
           "General cooling-system repair capability",
           "Located in Surrey"
         ],
 
         why:
-          "Dale's publishes Porsche-specific service information and identifies the Cayenne among the Porsche models it services. Its broader shop capabilities also include cooling-system repairs and diagnostics.",
+          "Dale's has Porsche-specific service coverage and identifies the Cayenne, while its broader published shop capabilities include cooling systems, diagnostics and suspension work.",
 
         source:
-          "https://dalesauto.ca/porsche-service-repair-vancouver/"
+          "https://dalesauto.ca/"
       }
 
     },
@@ -279,12 +289,14 @@ const businesses = [
 
     location: "Langley, BC",
 
+    city: "langley",
+
     category: "Independent Auto Repair",
 
     profiles: {
 
       // ----------------------------------------------
-      // INFINITI PROFILE
+      // INFINITI
       // ----------------------------------------------
 
       infiniti: {
@@ -309,13 +321,13 @@ const businesses = [
           "maintenance"
         ],
 
-        baseScore: 89,
+        baseScore: 87,
 
         evidenceStrength: "Medium-High",
 
         evidence: [
-          "Infiniti listed among supported import makes",
-          "G-series experience previously identified",
+          "Infiniti service capability",
+          "G-series experience",
           "Cooling-system repair",
           "Diagnostics",
           "Steering and suspension",
@@ -324,7 +336,7 @@ const businesses = [
         ],
 
         why:
-          "Norlang services Infiniti vehicles and publishes relevant capabilities including cooling-system repairs, diagnostics, steering and suspension, engine repair and drivetrain service.",
+          "Norlang services Infiniti vehicles and publishes relevant capabilities including cooling-system repairs, diagnostics, suspension, steering and drivetrain service.",
 
         source:
           "https://norlangauto.ca/services/"
@@ -332,7 +344,7 @@ const businesses = [
 
 
       // ----------------------------------------------
-      // PORSCHE PROFILE
+      // PORSCHE
       // ----------------------------------------------
 
       porsche: {
@@ -352,13 +364,13 @@ const businesses = [
           "maintenance"
         ],
 
-        baseScore: 84,
+        baseScore: 81,
 
         evidenceStrength: "Medium",
 
         evidence: [
-          "Porsche listed among supported European makes",
-          "Dedicated European repair division",
+          "Porsche supported through European division",
+          "European repair specialization",
           "Cooling-system repairs",
           "Diagnostics",
           "Steering and suspension",
@@ -366,7 +378,7 @@ const businesses = [
         ],
 
         why:
-          "Norlang has a dedicated European repair division and explicitly includes Porsche among the European vehicles it services. Its published shop capabilities include cooling-system, diagnostic and drivetrain work.",
+          "Norlang's European repair operation supports Porsche vehicles and its published capabilities include cooling-system repair, diagnostics, suspension and drivetrain service.",
 
         source:
           "https://norlangauto.ca/euro-fix/"
@@ -376,6 +388,125 @@ const businesses = [
 
     website:
       "https://norlangauto.ca/"
+  },
+
+
+  // ==================================================
+  // APPLEWOOD INFINITI LANGLEY
+  // ==================================================
+
+  {
+    id: "applewood-infiniti",
+
+    name: "Applewood INFINITI Langley",
+
+    location: "Langley, BC",
+
+    city: "langley",
+
+    category: "Authorized Infiniti Dealer",
+
+    profiles: {
+
+      infiniti: {
+
+        models: [
+          "q50",
+          "q60",
+          "qx50",
+          "qx55",
+          "qx60",
+          "qx80"
+        ],
+
+        jobs: [
+          "diagnostics",
+          "maintenance",
+          "brakes",
+          "cooling system",
+          "engine repair",
+          "transmission"
+        ],
+
+        baseScore: 82,
+
+        evidenceStrength: "Medium-High",
+
+        evidence: [
+          "Authorized Infiniti dealership",
+          "Infiniti service department",
+          "Infiniti-trained service capability",
+          "Brand-specific diagnostic environment",
+          "Located in Langley"
+        ],
+
+        why:
+          "Applewood provides authorized Infiniti service and brand-specific expertise. However, our current evidence is less specific to the G37 and this exact repair than some independent-shop results.",
+
+        source:
+          "https://www.applewoodinfiniti.ca/"
+      }
+
+    },
+
+    website:
+      "https://www.applewoodinfiniti.ca/"
+  },
+
+
+  // ==================================================
+  // WEISSACH
+  // ==================================================
+
+  {
+    id: "weissach",
+
+    name: "Weissach",
+
+    location: "Vancouver, BC",
+
+    city: "vancouver",
+
+    category: "Independent Porsche Specialist",
+
+    profiles: {
+
+      porsche: {
+
+        models: [],
+
+        jobs: [
+          "maintenance",
+          "brakes",
+          "cooling system",
+          "transmission",
+          "diagnostics"
+        ],
+
+        baseScore: 84,
+
+        evidenceStrength: "Medium-High",
+
+        evidence: [
+          "Independent Porsche specialist",
+          "Porsche sales, parts and service history",
+          "Cooling-system maintenance capability",
+          "Brake service capability",
+          "Transmission service capability",
+          "Located in Vancouver"
+        ],
+
+        why:
+          "Weissach has a long history as an independent Porsche specialist with Porsche service and parts capability. Our current evidence is strong at the brand level but less specific to this exact model and repair.",
+
+        source:
+          "https://www.weissach.com/"
+      }
+
+    },
+
+    website:
+      "https://www.weissach.com/"
   }
 
 ];
@@ -421,94 +552,52 @@ function understandSearch(query) {
 
 
   // ==================================================
-  // MODELS CAN IMPLY MAKE
+  // MODELS THAT IMPLY MAKE
   // ==================================================
 
-  if (text.includes("cayenne")) {
-
-    search.make = "porsche";
-
-    search.model = "cayenne";
-
-  }
-
-
-  if (text.includes("g37")) {
-
-    search.make = "infiniti";
-
-    search.model = "g37";
-
-  }
+  const porscheModels = [
+    "cayenne",
+    "macan",
+    "panamera",
+    "boxster",
+    "cayman"
+  ];
 
 
-  // ==================================================
-  // OTHER PORSCHE MODELS
-  // ==================================================
+  for (const model of porscheModels) {
 
-  if (text.includes("macan")) {
+    if (text.includes(model)) {
 
-    search.make = "porsche";
+      search.make = "porsche";
 
-    search.model = "macan";
+      search.model = model;
+
+    }
 
   }
 
 
-  if (text.includes("panamera")) {
-
-    search.make = "porsche";
-
-    search.model = "panamera";
-
-  }
-
-
-  if (text.includes("boxster")) {
-
-    search.make = "porsche";
-
-    search.model = "boxster";
-
-  }
+  const infinitiModels = [
+    "g37",
+    "q50",
+    "q60",
+    "qx50",
+    "qx55",
+    "qx60",
+    "qx80",
+    "fx35"
+  ];
 
 
-  if (text.includes("cayman")) {
+  for (const model of infinitiModels) {
 
-    search.make = "porsche";
+    if (text.includes(model)) {
 
-    search.model = "cayman";
+      search.make = "infiniti";
 
-  }
+      search.model = model;
 
-
-  // ==================================================
-  // OTHER INFINITI MODELS
-  // ==================================================
-
-  if (text.includes("q50")) {
-
-    search.make = "infiniti";
-
-    search.model = "q50";
-
-  }
-
-
-  if (text.includes("q60")) {
-
-    search.make = "infiniti";
-
-    search.model = "q60";
-
-  }
-
-
-  if (text.includes("qx60")) {
-
-    search.make = "infiniti";
-
-    search.model = "qx60";
+    }
 
   }
 
@@ -520,63 +609,34 @@ function understandSearch(query) {
   const unsupportedMakes = [
 
     "bmw",
-
     "audi",
-
     "mercedes",
-
     "mercedes-benz",
-
     "lexus",
-
     "acura",
-
     "honda",
-
     "toyota",
-
     "nissan",
-
     "ford",
-
     "chevrolet",
-
     "chevy",
-
     "subaru",
-
     "volkswagen",
-
     "volvo",
-
     "mazda",
-
     "hyundai",
-
     "kia",
-
     "tesla",
-
     "jeep",
-
     "dodge",
-
     "ram",
-
     "cadillac",
-
     "buick",
-
     "gmc",
-
     "mini",
-
     "jaguar",
-
     "land rover",
-
     "range rover"
-
   ];
 
 
@@ -616,15 +676,7 @@ function understandSearch(query) {
     text.includes("overheating") ||
     text.includes("running hot") ||
     text.includes("losing coolant") ||
-    text.includes("coolant leak")
-  ) {
-
-    search.job = "cooling system";
-
-  }
-
-
-  else if (
+    text.includes("coolant leak") ||
     text.includes("radiator") ||
     text.includes("thermostat") ||
     text.includes("coolant") ||
@@ -641,7 +693,8 @@ function understandSearch(query) {
     text.includes("shock") ||
     text.includes("shocks") ||
     text.includes("strut") ||
-    text.includes("struts")
+    text.includes("struts") ||
+    text.includes("air suspension")
   ) {
 
     search.job = "suspension";
@@ -682,7 +735,8 @@ function understandSearch(query) {
     text.includes("diagnostic") ||
     text.includes("check engine") ||
     text.includes("warning light") ||
-    text.includes("engine light")
+    text.includes("engine light") ||
+    text.includes("cel")
   ) {
 
     search.job = "diagnostics";
@@ -716,7 +770,7 @@ function understandSearch(query) {
 
 
 // --------------------------------------------------
-// GET CORRECT BUSINESS PROFILE
+// GET BUSINESS PROFILE
 // --------------------------------------------------
 
 function getBusinessProfile(
@@ -731,14 +785,63 @@ function getBusinessProfile(
   }
 
 
-  if (!business.profiles[make]) {
+  return business.profiles[make] || null;
 
-    return null;
+}
+
+
+// --------------------------------------------------
+// LOCATION SCORE
+// --------------------------------------------------
+
+function calculateLocationScore(
+  business,
+  location
+) {
+
+  if (!location) {
+
+    return 0;
 
   }
 
 
-  return business.profiles[make];
+  const text =
+    location.toLowerCase();
+
+
+  if (
+    text.includes(
+      business.city
+    )
+  ) {
+
+    return 4;
+
+  }
+
+
+  // Treat Surrey and Langley as nearby
+  // for this initial Lower Mainland test.
+
+  if (
+    (
+      text.includes("surrey") &&
+      business.city === "langley"
+    ) ||
+
+    (
+      text.includes("langley") &&
+      business.city === "surrey"
+    )
+  ) {
+
+    return 1;
+
+  }
+
+
+  return 0;
 
 }
 
@@ -750,7 +853,8 @@ function getBusinessProfile(
 function calculateScore(
   business,
   profile,
-  search
+  search,
+  location
 ) {
 
   let score =
@@ -758,7 +862,7 @@ function calculateScore(
 
 
   // ==================================================
-  // MODEL
+  // MODEL EVIDENCE
   // ==================================================
 
   if (search.model) {
@@ -769,24 +873,22 @@ function calculateScore(
       )
     ) {
 
-      score += 3;
+      score += 5;
 
     }
-
 
     else if (
       search.model === "g37" &&
       profile.models.includes("g")
     ) {
 
-      score += 1;
+      score += 2;
 
     }
 
-
     else {
 
-      score -= 8;
+      score -= 6;
 
     }
 
@@ -794,7 +896,7 @@ function calculateScore(
 
 
   // ==================================================
-  // JOB
+  // JOB EVIDENCE
   // ==================================================
 
   if (search.job) {
@@ -805,7 +907,7 @@ function calculateScore(
       )
     ) {
 
-      score += 3;
+      score += 5;
 
     }
 
@@ -816,6 +918,17 @@ function calculateScore(
     }
 
   }
+
+
+  // ==================================================
+  // LOCATION
+  // ==================================================
+
+  score +=
+    calculateLocationScore(
+      business,
+      location
+    );
 
 
   return score;
@@ -829,21 +942,21 @@ function calculateScore(
 
 function getMatchLabel(score) {
 
-  if (score >= 96) {
+  if (score >= 100) {
 
     return "Excellent match";
 
   }
 
 
-  if (score >= 88) {
+  if (score >= 90) {
 
     return "Strong match";
 
   }
 
 
-  if (score >= 78) {
+  if (score >= 80) {
 
     return "Possible match";
 
@@ -856,7 +969,7 @@ function getMatchLabel(score) {
 
 
 // --------------------------------------------------
-// FRIENDLY MAKE NAME
+// FORMAT MAKE NAME
 // --------------------------------------------------
 
 function formatMakeName(make) {
@@ -950,22 +1063,17 @@ function formatUnderstood(
   }
 
 
-  if (items.length === 0) {
+  return items.length
 
-    return (
-      "We couldn't confidently identify the vehicle or job."
-    );
+    ? items.join(" · ")
 
-  }
-
-
-  return items.join(" · ");
+    : "We couldn't confidently identify the vehicle or job.";
 
 }
 
 
 // --------------------------------------------------
-// SEARCH
+// PERFORM SEARCH
 // --------------------------------------------------
 
 function performSearch() {
@@ -994,10 +1102,6 @@ function performSearch() {
   let results = [];
 
 
-  // ==================================================
-  // SUPPORTED MAKE
-  // ==================================================
-
   if (understood.make) {
 
     businesses.forEach(
@@ -1021,7 +1125,8 @@ function performSearch() {
           calculateScore(
             business,
             profile,
-            understood
+            understood,
+            location
           );
 
 
@@ -1160,11 +1265,8 @@ function displayResults(
             margin-bottom:6px;
           "
         >
-
           We understood
-
         </div>
-
 
         <div
           style="
@@ -1172,30 +1274,22 @@ function displayResults(
             font-weight:700;
           "
         >
-
           ${makeName}
-
           ${
             understood.job
-
               ? ` · ${
                   understood.job
                     .charAt(0)
                     .toUpperCase() +
                   understood.job.slice(1)
                 }`
-
               : ""
           }
-
           ${
             location
-
               ? ` · ${location}`
-
               : ""
           }
-
         </div>
 
       </div>
@@ -1204,29 +1298,21 @@ function displayResults(
       <div class="result-card">
 
         <h3>
-
           We're not ready to recommend a
           ${makeName} shop yet.
-
         </h3>
-
 
         <div class="why">
 
           <strong>
-
             We don't want to guess.
-
           </strong>
 
-
           <p>
-
             Seek The Master has not yet
             researched enough ${makeName}
             businesses to confidently
             recommend one for this job.
-
           </p>
 
         </div>
@@ -1244,7 +1330,7 @@ function displayResults(
 
 
   // ==================================================
-  // NO VEHICLE IDENTIFIED
+  // NO VEHICLE
   // ==================================================
 
   if (!understood.make) {
@@ -1258,31 +1344,22 @@ function displayResults(
       <div class="result-card">
 
         <h3>
-
           What vehicle is this for?
-
         </h3>
-
 
         <div class="why">
 
           <strong>
-
             We could identify the job,
             but not the vehicle.
-
           </strong>
 
-
           <p>
-
             Include the make and model
             if you know it.
 
             For example:
-            "My 2011 Infiniti G37 is
-            overheating."
-
+            "My 2011 Infiniti G37 is overheating."
           </p>
 
         </div>
@@ -1324,11 +1401,8 @@ function displayResults(
           margin-bottom:6px;
         "
       >
-
         We understood
-
       </div>
-
 
       <div
         style="
@@ -1336,19 +1410,13 @@ function displayResults(
           font-weight:700;
         "
       >
-
         ${understoodText}
-
       </div>
 
     </div>
 
   `;
 
-
-  // ==================================================
-  // NO RESULTS
-  // ==================================================
 
   if (results.length === 0) {
 
@@ -1361,32 +1429,16 @@ function displayResults(
       <div class="result-card">
 
         <h3>
-
-          We don't have enough
-          evidence yet.
-
+          We don't have enough evidence yet.
         </h3>
-
 
         <div class="why">
 
           <strong>
-
             We found the vehicle,
-            but don't yet have a
-            researched business profile.
-
+            but don't have researched
+            business profiles yet.
           </strong>
-
-
-          <p>
-
-            Seek The Master only
-            recommends businesses when
-            there is enough evidence
-            to support the match.
-
-          </p>
 
         </div>
 
@@ -1438,20 +1490,13 @@ function displayResults(
           <div>
 
             <h3>
-
               ${result.name}
-
             </h3>
 
-
             <div class="business-location">
-
               ${result.location}
-
               ·
-
               ${result.category}
-
             </div>
 
           </div>
@@ -1465,16 +1510,11 @@ function displayResults(
                 font-weight:800;
               "
             >
-
               ${result.matchLabel}
-
             </div>
 
-
             <div class="match-label">
-
               Job Match
-
             </div>
 
           </div>
@@ -1485,16 +1525,11 @@ function displayResults(
         <div class="why">
 
           <strong>
-
             Why this matches your job
-
           </strong>
 
-
           <p>
-
             ${profile.why}
-
           </p>
 
         </div>
@@ -1507,9 +1542,7 @@ function displayResults(
             font-weight:700;
           "
         >
-
           Evidence we found
-
         </div>
 
 
@@ -1518,11 +1551,9 @@ function displayResults(
           ${profile.evidence
             .map(
               item =>
-
                 `<span class="evidence-tag">
                   ✓ ${item}
                 </span>`
-
             )
             .join("")}
 
@@ -1540,9 +1571,7 @@ function displayResults(
           Evidence strength:
 
           <strong>
-
             ${profile.evidenceStrength}
-
           </strong>
 
         </div>
@@ -1560,9 +1589,7 @@ function displayResults(
               )
             "
           >
-
             Visit business
-
           </a>
 
 
@@ -1572,9 +1599,7 @@ function displayResults(
             rel="noopener noreferrer"
             style="margin-left:8px;"
           >
-
             See evidence
-
           </a>
 
         </div>

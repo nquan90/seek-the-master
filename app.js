@@ -8,17 +8,17 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — EXPERIMENT V0.5
+// SEEK THE MASTER — EXPERIMENT V0.6
 // ==================================================
 //
-// Changes in V0.5:
+// V0.6:
 //
-// - Expanded real business dataset
-// - Added dealer/specialist benchmark results
-// - Added basic location relevance
-// - Evidence remains separated by vehicle make
-// - Exact model/job evidence ranks above generic
-//   brand-level experience
+// - GA4 event tracking
+// - Vertical-aware architecture begins
+// - No raw free-text query is sent to analytics
+// - Tracks interpreted vehicle/job information
+// - Tracks supported vs unsupported searches
+// - Tracks business clicks
 //
 // ==================================================
 
@@ -43,6 +43,8 @@ const businesses = [
     city: "surrey",
 
     category: "European Auto Repair",
+
+    vertical: "automotive",
 
     profiles: {
 
@@ -107,6 +109,8 @@ const businesses = [
     city: "langley",
 
     category: "Porsche Specialist",
+
+    vertical: "automotive",
 
     profiles: {
 
@@ -174,11 +178,9 @@ const businesses = [
 
     category: "Independent Auto Repair",
 
-    profiles: {
+    vertical: "automotive",
 
-      // ----------------------------------------------
-      // INFINITI
-      // ----------------------------------------------
+    profiles: {
 
       infiniti: {
 
@@ -224,10 +226,6 @@ const businesses = [
           "https://dalesauto.ca/infiniti-service-repair-surrey/"
       },
 
-
-      // ----------------------------------------------
-      // PORSCHE
-      // ----------------------------------------------
 
       porsche: {
 
@@ -293,11 +291,9 @@ const businesses = [
 
     category: "Independent Auto Repair",
 
-    profiles: {
+    vertical: "automotive",
 
-      // ----------------------------------------------
-      // INFINITI
-      // ----------------------------------------------
+    profiles: {
 
       infiniti: {
 
@@ -342,10 +338,6 @@ const businesses = [
           "https://norlangauto.ca/services/"
       },
 
-
-      // ----------------------------------------------
-      // PORSCHE
-      // ----------------------------------------------
 
       porsche: {
 
@@ -392,7 +384,7 @@ const businesses = [
 
 
   // ==================================================
-  // APPLEWOOD INFINITI LANGLEY
+  // APPLEWOOD INFINITI
   // ==================================================
 
   {
@@ -405,6 +397,8 @@ const businesses = [
     city: "langley",
 
     category: "Authorized Infiniti Dealer",
+
+    vertical: "automotive",
 
     profiles: {
 
@@ -469,6 +463,8 @@ const businesses = [
 
     category: "Independent Porsche Specialist",
 
+    vertical: "automotive",
+
     profiles: {
 
       porsche: {
@@ -522,6 +518,8 @@ function understandSearch(query) {
 
   const search = {
 
+    vertical: null,
+
     make: null,
 
     model: null,
@@ -534,10 +532,50 @@ function understandSearch(query) {
 
 
   // ==================================================
+  // AUTOMOTIVE DETECTION
+  // ==================================================
+
+  const automotiveTerms = [
+    "car",
+    "vehicle",
+    "mechanic",
+    "porsche",
+    "infiniti",
+    "g37",
+    "cayenne",
+    "macan",
+    "panamera",
+    "q50",
+    "q60",
+    "qx60",
+    "engine",
+    "brake",
+    "transmission",
+    "coolant",
+    "radiator",
+    "suspension"
+  ];
+
+
+  if (
+    automotiveTerms.some(
+      term => text.includes(term)
+    )
+  ) {
+
+    search.vertical =
+      "automotive";
+
+  }
+
+
+  // ==================================================
   // SUPPORTED MAKES
   // ==================================================
 
   if (text.includes("porsche")) {
+
+    search.vertical = "automotive";
 
     search.make = "porsche";
 
@@ -545,6 +583,8 @@ function understandSearch(query) {
 
 
   if (text.includes("infiniti")) {
+
+    search.vertical = "automotive";
 
     search.make = "infiniti";
 
@@ -568,9 +608,14 @@ function understandSearch(query) {
 
     if (text.includes(model)) {
 
-      search.make = "porsche";
+      search.vertical =
+        "automotive";
 
-      search.model = model;
+      search.make =
+        "porsche";
+
+      search.model =
+        model;
 
     }
 
@@ -593,9 +638,14 @@ function understandSearch(query) {
 
     if (text.includes(model)) {
 
-      search.make = "infiniti";
+      search.vertical =
+        "automotive";
 
-      search.model = model;
+      search.make =
+        "infiniti";
+
+      search.model =
+        model;
 
     }
 
@@ -603,7 +653,7 @@ function understandSearch(query) {
 
 
   // ==================================================
-  // UNSUPPORTED MAKES
+  // UNSUPPORTED AUTOMOTIVE MAKES
   // ==================================================
 
   const unsupportedMakes = [
@@ -646,7 +696,11 @@ function understandSearch(query) {
 
       if (text.includes(make)) {
 
-        search.unsupportedMake = make;
+        search.vertical =
+          "automotive";
+
+        search.unsupportedMake =
+          make;
 
         break;
 
@@ -658,7 +712,7 @@ function understandSearch(query) {
 
 
   // ==================================================
-  // JOB / PROBLEM
+  // AUTOMOTIVE JOB / PROBLEM
   // ==================================================
 
   if (
@@ -666,7 +720,11 @@ function understandSearch(query) {
     text.includes("waterpump")
   ) {
 
-    search.job = "water pump";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "water pump";
 
   }
 
@@ -683,7 +741,11 @@ function understandSearch(query) {
     text.includes("cooling")
   ) {
 
-    search.job = "cooling system";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "cooling system";
 
   }
 
@@ -697,7 +759,11 @@ function understandSearch(query) {
     text.includes("air suspension")
   ) {
 
-    search.job = "suspension";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "suspension";
 
   }
 
@@ -706,7 +772,11 @@ function understandSearch(query) {
     text.includes("steering")
   ) {
 
-    search.job = "steering";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "steering";
 
   }
 
@@ -716,7 +786,11 @@ function understandSearch(query) {
     text.includes("gearbox")
   ) {
 
-    search.job = "transmission";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "transmission";
 
   }
 
@@ -726,7 +800,11 @@ function understandSearch(query) {
     text.includes("brakes")
   ) {
 
-    search.job = "brakes";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "brakes";
 
   }
 
@@ -739,7 +817,11 @@ function understandSearch(query) {
     text.includes("cel")
   ) {
 
-    search.job = "diagnostics";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "diagnostics";
 
   }
 
@@ -748,18 +830,25 @@ function understandSearch(query) {
     text.includes("engine")
   ) {
 
-    search.job = "engine repair";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "engine repair";
 
   }
 
 
   else if (
-    text.includes("maintenance") ||
-    text.includes("service") ||
-    text.includes("oil change")
+    text.includes("oil change") ||
+    text.includes("maintenance")
   ) {
 
-    search.job = "maintenance";
+    search.vertical =
+      "automotive";
+
+    search.job =
+      "maintenance";
 
   }
 
@@ -821,9 +910,6 @@ function calculateLocationScore(
   }
 
 
-  // Treat Surrey and Langley as nearby
-  // for this initial Lower Mainland test.
-
   if (
     (
       text.includes("surrey") &&
@@ -861,10 +947,6 @@ function calculateScore(
     profile.baseScore;
 
 
-  // ==================================================
-  // MODEL EVIDENCE
-  // ==================================================
-
   if (search.model) {
 
     if (
@@ -895,10 +977,6 @@ function calculateScore(
   }
 
 
-  // ==================================================
-  // JOB EVIDENCE
-  // ==================================================
-
   if (search.job) {
 
     if (
@@ -919,10 +997,6 @@ function calculateScore(
 
   }
 
-
-  // ==================================================
-  // LOCATION
-  // ==================================================
 
   score +=
     calculateLocationScore(
@@ -969,7 +1043,7 @@ function getMatchLabel(score) {
 
 
 // --------------------------------------------------
-// FORMAT MAKE NAME
+// FORMAT MAKE
 // --------------------------------------------------
 
 function formatMakeName(make) {
@@ -1013,7 +1087,7 @@ function formatMakeName(make) {
 
 
 // --------------------------------------------------
-// FORMAT SEARCH INTERPRETATION
+// FORMAT SEARCH
 // --------------------------------------------------
 
 function formatUnderstood(
@@ -1022,6 +1096,16 @@ function formatUnderstood(
 ) {
 
   const items = [];
+
+
+  if (search.vertical) {
+
+    items.push(
+      search.vertical.charAt(0).toUpperCase() +
+      search.vertical.slice(1)
+    );
+
+  }
 
 
   if (search.make) {
@@ -1047,9 +1131,7 @@ function formatUnderstood(
   if (search.job) {
 
     items.push(
-      search.job
-        .charAt(0)
-        .toUpperCase() +
+      search.job.charAt(0).toUpperCase() +
       search.job.slice(1)
     );
 
@@ -1064,10 +1146,39 @@ function formatUnderstood(
 
 
   return items.length
-
     ? items.join(" · ")
+    : "We couldn't confidently identify the job.";
 
-    : "We couldn't confidently identify the vehicle or job.";
+}
+
+
+// --------------------------------------------------
+// ANALYTICS
+// --------------------------------------------------
+
+function trackEvent(
+  eventName,
+  eventData = {}
+) {
+
+  console.log(
+    "Seek The Master Event:",
+    eventName,
+    eventData
+  );
+
+
+  if (
+    typeof window.gtag === "function"
+  ) {
+
+    window.gtag(
+      "event",
+      eventName,
+      eventData
+    );
+
+  }
 
 }
 
@@ -1102,10 +1213,23 @@ function performSearch() {
   let results = [];
 
 
-  if (understood.make) {
+  if (
+    understood.vertical === "automotive" &&
+    understood.make
+  ) {
 
     businesses.forEach(
       business => {
+
+        if (
+          business.vertical !==
+          "automotive"
+        ) {
+
+          return;
+
+        }
+
 
         const profile =
           getBusinessProfile(
@@ -1168,6 +1292,90 @@ function performSearch() {
   }
 
 
+  // ==================================================
+  // ANALYTICS — SEARCH
+  // ==================================================
+
+  trackEvent(
+    "stm_search",
+    {
+
+      vertical:
+        understood.vertical || "unknown",
+
+      vehicle_make:
+        understood.make || "unknown",
+
+      vehicle_model:
+        understood.model || "unknown",
+
+      job_type:
+        understood.job || "unknown",
+
+      search_location:
+        location
+          ? location.toLowerCase().substring(0, 50)
+          : "not_provided",
+
+      supported:
+        understood.make
+          ? "yes"
+          : "no",
+
+      result_count:
+        results.length
+
+    }
+  );
+
+
+  if (
+    understood.unsupportedMake
+  ) {
+
+    trackEvent(
+      "stm_unsupported_vehicle",
+      {
+
+        vehicle_make:
+          understood.unsupportedMake,
+
+        job_type:
+          understood.job || "unknown"
+
+      }
+    );
+
+  }
+
+
+  if (
+    understood.make &&
+    results.length === 0
+  ) {
+
+    trackEvent(
+      "stm_no_match",
+      {
+
+        vertical:
+          understood.vertical || "unknown",
+
+        vehicle_make:
+          understood.make,
+
+        vehicle_model:
+          understood.model || "unknown",
+
+        job_type:
+          understood.job || "unknown"
+
+      }
+    );
+
+  }
+
+
   displayResults(
     results,
     location,
@@ -1176,44 +1384,11 @@ function performSearch() {
 
 
   localStorage.setItem(
-
     "lastSearch",
-
     JSON.stringify({
-
       query,
-
       location
-
     })
-
-  );
-
-
-  trackEvent(
-
-    "search",
-
-    {
-
-      query,
-
-      location,
-
-      make:
-        understood.make,
-
-      model:
-        understood.model,
-
-      job:
-        understood.job,
-
-      unsupportedMake:
-        understood.unsupportedMake
-
-    }
-
   );
 
 }
@@ -1274,7 +1449,8 @@ function displayResults(
             font-weight:700;
           "
         >
-          ${makeName}
+          Automotive · ${makeName}
+
           ${
             understood.job
               ? ` · ${
@@ -1285,11 +1461,13 @@ function displayResults(
                 }`
               : ""
           }
+
           ${
             location
               ? ` · ${location}`
               : ""
           }
+
         </div>
 
       </div>
@@ -1330,10 +1508,69 @@ function displayResults(
 
 
   // ==================================================
-  // NO VEHICLE
+  // UNKNOWN / FUTURE VERTICAL
   // ==================================================
 
-  if (!understood.make) {
+  if (!understood.vertical) {
+
+    resultsSummary.textContent =
+      "We're still learning this type of job";
+
+
+    resultsContainer.innerHTML = `
+
+      <div class="result-card">
+
+        <h3>
+          We don't support this search yet.
+        </h3>
+
+        <div class="why">
+
+          <strong>
+            But this is useful feedback.
+          </strong>
+
+          <p>
+            Seek The Master is currently testing
+            automotive matching first.
+
+            Home services and other industries
+            will use the same search experience
+            as we add their evidence profiles.
+          </p>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    trackEvent(
+      "stm_unsupported_vertical",
+      {
+        vertical:
+          "unknown"
+      }
+    );
+
+
+    showResults();
+
+    return;
+
+  }
+
+
+  // ==================================================
+  // AUTOMOTIVE — MAKE NOT PROVIDED
+  // ==================================================
+
+  if (
+    understood.vertical === "automotive" &&
+    !understood.make
+  ) {
 
     resultsSummary.textContent =
       "We need more information";
@@ -1350,13 +1587,13 @@ function displayResults(
         <div class="why">
 
           <strong>
-            We could identify the job,
+            We identified an automotive job,
             but not the vehicle.
           </strong>
 
           <p>
-            Include the make and model
-            if you know it.
+            Include the make and model if you
+            know it.
 
             For example:
             "My 2011 Infiniti G37 is overheating."
@@ -1435,9 +1672,9 @@ function displayResults(
         <div class="why">
 
           <strong>
-            We found the vehicle,
-            but don't have researched
-            business profiles yet.
+            We understood the search,
+            but don't yet have researched
+            business profiles for it.
           </strong>
 
         </div>
@@ -1463,11 +1700,11 @@ function displayResults(
 
 
   // ==================================================
-  // RESULT CARDS
+  // RESULTS
   // ==================================================
 
   results.forEach(
-    result => {
+    (result, index) => {
 
       const profile =
         result.profile;
@@ -1583,11 +1820,10 @@ function displayResults(
             href="${result.website}"
             target="_blank"
             rel="noopener noreferrer"
-            onclick="
-              trackBusinessClick(
-                '${result.name}'
-              )
-            "
+            data-business-id="${result.id}"
+            data-business-name="${result.name}"
+            data-rank="${index + 1}"
+            class="business-link"
           >
             Visit business
           </a>
@@ -1597,6 +1833,10 @@ function displayResults(
             href="${profile.source}"
             target="_blank"
             rel="noopener noreferrer"
+            data-business-id="${result.id}"
+            data-business-name="${result.name}"
+            data-rank="${index + 1}"
+            class="evidence-link"
             style="margin-left:8px;"
           >
             See evidence
@@ -1614,7 +1854,118 @@ function displayResults(
     });
 
 
+  attachResultTracking(
+    understood
+  );
+
+
   showResults();
+
+}
+
+
+// --------------------------------------------------
+// RESULT CLICK TRACKING
+// --------------------------------------------------
+
+function attachResultTracking(
+  understood
+) {
+
+  document
+    .querySelectorAll(
+      ".business-link"
+    )
+    .forEach(
+      link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            trackEvent(
+              "stm_business_click",
+              {
+
+                business_id:
+                  link.dataset.businessId,
+
+                business_name:
+                  link.dataset.businessName,
+
+                result_rank:
+                  Number(
+                    link.dataset.rank
+                  ),
+
+                vertical:
+                  understood.vertical || "unknown",
+
+                vehicle_make:
+                  understood.make || "unknown",
+
+                vehicle_model:
+                  understood.model || "unknown",
+
+                job_type:
+                  understood.job || "unknown"
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      ".evidence-link"
+    )
+    .forEach(
+      link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            trackEvent(
+              "stm_evidence_click",
+              {
+
+                business_id:
+                  link.dataset.businessId,
+
+                business_name:
+                  link.dataset.businessName,
+
+                result_rank:
+                  Number(
+                    link.dataset.rank
+                  ),
+
+                vertical:
+                  understood.vertical || "unknown",
+
+                vehicle_make:
+                  understood.make || "unknown",
+
+                vehicle_model:
+                  understood.model || "unknown",
+
+                job_type:
+                  understood.job || "unknown"
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -1631,9 +1982,7 @@ function showResults() {
 
 
   resultsSection.scrollIntoView({
-
     behavior: "smooth"
-
   });
 
 }
@@ -1680,11 +2029,8 @@ document
 // --------------------------------------------------
 
 searchButton.addEventListener(
-
   "click",
-
   performSearch
-
 );
 
 
@@ -1693,9 +2039,7 @@ searchButton.addEventListener(
 // --------------------------------------------------
 
 searchInput.addEventListener(
-
   "keydown",
-
   event => {
 
     if (
@@ -1710,50 +2054,7 @@ searchInput.addEventListener(
     }
 
   }
-
 );
-
-
-// --------------------------------------------------
-// ANALYTICS PLACEHOLDER
-// --------------------------------------------------
-
-function trackEvent(
-  eventName,
-  eventData
-) {
-
-  console.log(
-
-    "Seek The Master Event:",
-
-    eventName,
-
-    eventData
-
-  );
-
-}
-
-
-function trackBusinessClick(
-  businessName
-) {
-
-  trackEvent(
-
-    "business_click",
-
-    {
-
-      business:
-        businessName
-
-    }
-
-  );
-
-}
 
 
 // --------------------------------------------------

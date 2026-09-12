@@ -8,574 +8,33 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — V0.7
+// SEEK THE MASTER — V0.8
 // ==================================================
 //
-// Supported verticals:
+// Business data now lives in:
 //
-// 1. Automotive
-// 2. Home Services — Exterior Cleaning
+// data/automotive.js
+// data/home-services.js
 //
-// The same search box routes the request to the
-// appropriate evidence database.
+// app.js is now responsible for:
+// - understanding the search
+// - routing by vertical
+// - scoring businesses
+// - displaying results
+// - analytics
 //
 // ==================================================
 
 
-// ==================================================
-// AUTOMOTIVE DATABASE
-// ==================================================
-
-const automotiveBusinesses = [
-
-  {
-    id: "nexus-auto-group",
-    name: "Nexus Auto Group",
-    location: "Surrey, BC",
-    city: "surrey",
-    category: "European Auto Repair",
-    vertical: "automotive",
-
-    profiles: {
-
-      porsche: {
-
-        models: [
-          "cayenne"
-        ],
-
-        jobs: [
-          "water pump",
-          "cooling system",
-          "thermostat",
-          "radiator",
-          "engine repair",
-          "diagnostics",
-          "suspension",
-          "steering",
-          "brakes",
-          "maintenance"
-        ],
-
-        baseScore: 94,
-
-        evidenceStrength: "High",
-
-        evidence: [
-          "Porsche-specific repair information",
-          "Cayenne specifically referenced",
-          "Water-pump failures specifically referenced",
-          "Cooling-system repairs specifically listed",
-          "Cayenne suspension work referenced",
-          "Porsche-compatible diagnostic equipment",
-          "Located in Surrey"
-        ],
-
-        why:
-          "Nexus publishes unusually specific Porsche repair information. Its material identifies the Cayenne and discusses cooling-system repairs, water pumps, suspension work and Porsche diagnostics.",
-
-        source:
-          "https://nexusautogroup.ca/porsche-repair-service"
-      }
-
-    },
-
-    website:
-      "https://nexusautogroup.ca/"
-  },
-
-
-  {
-    id: "turn3-autosport",
-    name: "Turn3 Autosport",
-    location: "Langley, BC",
-    city: "langley",
-    category: "Porsche Specialist",
-    vertical: "automotive",
-
-    profiles: {
-
-      porsche: {
-
-        models: [
-          "cayenne",
-          "911",
-          "macan",
-          "boxster",
-          "cayman"
-        ],
-
-        jobs: [
-          "water pump",
-          "cooling system",
-          "maintenance",
-          "engine repair",
-          "transmission",
-          "brakes",
-          "diagnostics",
-          "suspension",
-          "steering"
-        ],
-
-        baseScore: 93,
-
-        evidenceStrength: "High",
-
-        evidence: [
-          "Dedicated Porsche specialist",
-          "Porsche-specific repair services",
-          "Porsche diagnostic equipment",
-          "Engine and gearbox capability",
-          "Suspension and steering capability",
-          "Lower Mainland Porsche focus"
-        ],
-
-        why:
-          "Turn3 is a Porsche-focused specialist rather than a generic repair shop, with broad Porsche repair, diagnostic and maintenance capability.",
-
-        source:
-          "https://turn3autosport.com/porsche-service-repair/"
-      }
-
-    },
-
-    website:
-      "https://turn3autosport.com/"
-  },
-
-
-  {
-    id: "dales-auto",
-    name: "Dale's Auto Service",
-    location: "Surrey, BC",
-    city: "surrey",
-    category: "Independent Auto Repair",
-    vertical: "automotive",
-
-    profiles: {
-
-      infiniti: {
-
-        models: [
-          "g",
-          "g37",
-          "q50",
-          "q60",
-          "qx50",
-          "qx60",
-          "fx35"
-        ],
-
-        jobs: [
-          "diagnostics",
-          "engine repair",
-          "brakes",
-          "suspension",
-          "steering",
-          "transmission",
-          "maintenance",
-          "cooling system"
-        ],
-
-        baseScore: 94,
-
-        evidenceStrength: "High",
-
-        evidence: [
-          "Dedicated Infiniti service information",
-          "G37 specifically identified",
-          "Engine diagnostics",
-          "Suspension and steering services",
-          "Transmission repair",
-          "Cooling-system service",
-          "Located in Surrey"
-        ],
-
-        why:
-          "Dale's publishes dedicated Infiniti service information and specifically identifies the G37, along with relevant diagnostic, cooling, suspension and drivetrain services.",
-
-        source:
-          "https://dalesauto.ca/infiniti-service-repair-surrey/"
-      },
-
-
-      porsche: {
-
-        models: [
-          "cayenne",
-          "911",
-          "macan",
-          "panamera",
-          "cayman",
-          "boxster"
-        ],
-
-        jobs: [
-          "diagnostics",
-          "brakes",
-          "suspension",
-          "steering",
-          "maintenance",
-          "cooling system",
-          "engine repair",
-          "transmission"
-        ],
-
-        baseScore: 84,
-
-        evidenceStrength: "Medium-High",
-
-        evidence: [
-          "Porsche service information",
-          "Cayenne identified",
-          "Porsche diagnostics",
-          "Suspension and steering capability",
-          "Cooling-system repair capability",
-          "Located in Surrey"
-        ],
-
-        why:
-          "Dale's has Porsche-specific service coverage and identifies the Cayenne, with broader diagnostic, cooling-system and suspension capabilities.",
-
-        source:
-          "https://dalesauto.ca/"
-      }
-
-    },
-
-    website:
-      "https://dalesauto.ca/"
-  },
-
-
-  {
-    id: "norlang-auto",
-    name: "Norlang Automotive",
-    location: "Langley, BC",
-    city: "langley",
-    category: "Independent Auto Repair",
-    vertical: "automotive",
-
-    profiles: {
-
-      infiniti: {
-
-        models: [
-          "g",
-          "g37",
-          "q50",
-          "q60",
-          "qx50",
-          "qx60"
-        ],
-
-        jobs: [
-          "diagnostics",
-          "cooling system",
-          "engine repair",
-          "brakes",
-          "suspension",
-          "steering",
-          "transmission",
-          "maintenance"
-        ],
-
-        baseScore: 87,
-
-        evidenceStrength: "Medium-High",
-
-        evidence: [
-          "Infiniti service capability",
-          "G-series experience",
-          "Cooling-system repair",
-          "Diagnostics",
-          "Steering and suspension",
-          "Transmission and drivetrain"
-        ],
-
-        why:
-          "Norlang services Infiniti vehicles and publishes relevant capabilities including cooling-system repairs, diagnostics, suspension, steering and drivetrain service.",
-
-        source:
-          "https://norlangauto.ca/services/"
-      },
-
-
-      porsche: {
-
-        models: [
-          "cayenne"
-        ],
-
-        jobs: [
-          "diagnostics",
-          "cooling system",
-          "engine repair",
-          "brakes",
-          "suspension",
-          "steering",
-          "transmission",
-          "maintenance"
-        ],
-
-        baseScore: 81,
-
-        evidenceStrength: "Medium",
-
-        evidence: [
-          "Porsche supported through European division",
-          "European repair specialization",
-          "Cooling-system repairs",
-          "Diagnostics",
-          "Steering and suspension",
-          "Transmission and drivetrain"
-        ],
-
-        why:
-          "Norlang's European repair operation supports Porsche vehicles and publishes relevant cooling-system, suspension, diagnostic and drivetrain capabilities.",
-
-        source:
-          "https://norlangauto.ca/euro-fix/"
-      }
-
-    },
-
-    website:
-      "https://norlangauto.ca/"
-  }
-
-];
-
-
-// ==================================================
-// HOME SERVICES DATABASE
-// ==================================================
-
-const homeServiceBusinesses = [
-
-  {
-    id: "all-canadian-home-services",
-
-    name: "All Canadian Home Services",
-
-    location: "Surrey, BC",
-
-    city: "surrey",
-
-    category: "Roof & Exterior Cleaning",
-
-    vertical: "home_services",
-
-    profile: {
-
-      jobs: [
-        "roof moss removal",
-        "roof cleaning",
-        "soft washing",
-        "pressure washing",
-        "gutter cleaning"
-      ],
-
-      surfaces: [
-        "roof",
-        "shingles",
-        "driveway",
-        "patio",
-        "siding"
-      ],
-
-      baseScore: 95,
-
-      evidenceStrength: "High",
-
-      evidence: [
-        "Roof cleaning specifically offered",
-        "Moss removal specifically offered",
-        "Soft-wash roof cleaning",
-        "Avoids damaging high pressure on roofs",
-        "Serves Surrey and nearby communities"
-      ],
-
-      why:
-        "All Canadian specifically advertises roof cleaning and moss removal in Surrey and uses soft-wash methods designed for delicate roofing surfaces.",
-
-      source:
-        "https://allcanadianhs.ca/"
-    },
-
-    website:
-      "https://allcanadianhs.ca/"
-  },
-
-
-  {
-    id: "dragon-wash",
-
-    name: "Dragon Wash",
-
-    location: "Surrey, BC",
-
-    city: "surrey",
-
-    category: "Exterior Cleaning",
-
-    vertical: "home_services",
-
-    profile: {
-
-      jobs: [
-        "roof moss removal",
-        "roof cleaning",
-        "soft washing",
-        "pressure washing",
-        "gutter cleaning",
-        "window cleaning"
-      ],
-
-      surfaces: [
-        "roof",
-        "shingles",
-        "driveway",
-        "patio",
-        "deck",
-        "fence"
-      ],
-
-      baseScore: 94,
-
-      evidenceStrength: "High",
-
-      evidence: [
-        "Dedicated roof-cleaning service",
-        "Moss removal specifically advertised",
-        "Soft-wash roof techniques",
-        "States high pressure is not used on roofs",
-        "Surrey-based"
-      ],
-
-      why:
-        "Dragon Wash specifically advertises roof cleaning and moss removal in Surrey and says it uses soft washing rather than high pressure on roofing materials.",
-
-      source:
-        "https://dragonwash.ca/roof-clean"
-    },
-
-    website:
-      "https://dragonwash.ca/"
-  },
-
-
-  {
-    id: "two-angels-home-services",
-
-    name: "2 Angels Home Services",
-
-    location: "Langley / Surrey, BC",
-
-    city: "langley",
-
-    category: "Exterior Home Services",
-
-    vertical: "home_services",
-
-    profile: {
-
-      jobs: [
-        "roof moss removal",
-        "roof cleaning",
-        "soft washing",
-        "pressure washing",
-        "gutter cleaning",
-        "window cleaning"
-      ],
-
-      surfaces: [
-        "roof",
-        "siding",
-        "driveway",
-        "retaining wall"
-      ],
-
-      baseScore: 91,
-
-      evidenceStrength: "High",
-
-      evidence: [
-        "Roof moss removal specifically listed",
-        "Soft washing specifically listed",
-        "Residential exterior cleaning",
-        "Services both Surrey and Langley",
-        "Roof moss and algae treatment"
-      ],
-
-      why:
-        "2 Angels specifically lists roof moss removal and soft washing among its residential exterior-cleaning services for Surrey and Langley.",
-
-      source:
-        "https://www.2angelshomeservices.com/"
-    },
-
-    website:
-      "https://www.2angelshomeservices.com/"
-  },
-
-
-  {
-    id: "shiny-power-wash",
-
-    name: "Shiny Power Wash",
-
-    location: "Surrey, BC",
-
-    city: "surrey",
-
-    category: "Exterior Cleaning",
-
-    vertical: "home_services",
-
-    profile: {
-
-      jobs: [
-        "roof moss removal",
-        "roof cleaning",
-        "soft washing",
-        "pressure washing",
-        "gutter cleaning",
-        "house washing"
-      ],
-
-      surfaces: [
-        "roof",
-        "shingles",
-        "house exterior",
-        "driveway",
-        "concrete"
-      ],
-
-      baseScore: 90,
-
-      evidenceStrength: "High",
-
-      evidence: [
-        "Roof cleaning and moss control specifically offered",
-        "Three-year moss-free warranty advertised",
-        "Soft washing capability",
-        "Surrey-based",
-        "Serves Lower Mainland"
-      ],
-
-      why:
-        "Shiny Power Wash specifically offers roof cleaning and moss control and advertises a moss-free warranty for its roof-cleaning work.",
-
-      source:
-        "https://shinypowerwash.ca/roof-cleaning-moss-control/"
-    },
-
-    website:
-      "https://shinypowerwash.ca/"
-  }
-
-];
+// --------------------------------------------------
+// LOAD DATA FROM SEPARATE FILES
+// --------------------------------------------------
+
+const automotiveBusinesses =
+  window.AUTOMOTIVE_BUSINESSES || [];
+
+const homeServiceBusinesses =
+  window.HOME_SERVICE_BUSINESSES || [];
 
 
 // ==================================================
@@ -584,33 +43,23 @@ const homeServiceBusinesses = [
 
 function understandSearch(query) {
 
-  const text =
-    query.toLowerCase();
-
+  const text = query.toLowerCase();
 
   const search = {
-
     vertical: null,
-
     make: null,
-
     model: null,
-
     job: null,
-
     surface: null,
-
     unsupportedMake: null
-
   };
 
 
   // ==================================================
-  // HOME SERVICES DETECTION
+  // HOME SERVICES
   // ==================================================
 
   const homeTerms = [
-
     "roof",
     "moss",
     "gutter",
@@ -625,14 +74,12 @@ function understandSearch(query) {
     "deck",
     "house wash",
     "house washing"
-
   ];
 
 
   if (
     homeTerms.some(
-      term =>
-        text.includes(term)
+      term => text.includes(term)
     )
   ) {
 
@@ -641,10 +88,6 @@ function understandSearch(query) {
 
   }
 
-
-  // ==================================================
-  // HOME SERVICE JOB
-  // ==================================================
 
   if (
     search.vertical ===
@@ -664,7 +107,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("roof")
     ) {
@@ -676,7 +118,6 @@ function understandSearch(query) {
         "roof";
 
     }
-
 
     else if (
       text.includes("gutter")
@@ -690,7 +131,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("pressure wash") ||
       text.includes("pressure washing") ||
@@ -701,7 +141,6 @@ function understandSearch(query) {
         "pressure washing";
 
     }
-
 
     else if (
       text.includes("soft wash")
@@ -722,7 +161,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("siding")
     ) {
@@ -732,7 +170,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("patio")
     ) {
@@ -741,7 +178,6 @@ function understandSearch(query) {
         "patio";
 
     }
-
 
     else if (
       text.includes("deck")
@@ -756,10 +192,7 @@ function understandSearch(query) {
 
 
   // ==================================================
-  // AUTOMOTIVE DETECTION
-  //
-  // Only run if we have not already clearly
-  // identified a home-service search.
+  // AUTOMOTIVE
   // ==================================================
 
   if (
@@ -768,7 +201,6 @@ function understandSearch(query) {
   ) {
 
     const automotiveTerms = [
-
       "car",
       "vehicle",
       "mechanic",
@@ -788,14 +220,12 @@ function understandSearch(query) {
       "radiator",
       "suspension",
       "water pump"
-
     ];
 
 
     if (
       automotiveTerms.some(
-        term =>
-          text.includes(term)
+        term => text.includes(term)
       )
     ) {
 
@@ -807,14 +237,12 @@ function understandSearch(query) {
   }
 
 
-  // ==================================================
-  // AUTOMOTIVE — SUPPORTED MAKES
-  // ==================================================
-
   if (
     search.vertical ===
     "automotive"
   ) {
+
+    // Supported makes
 
     if (
       text.includes("porsche")
@@ -839,13 +267,11 @@ function understandSearch(query) {
     // Porsche models
 
     const porscheModels = [
-
       "cayenne",
       "macan",
       "panamera",
       "boxster",
       "cayman"
-
     ];
 
 
@@ -872,7 +298,6 @@ function understandSearch(query) {
     // Infiniti models
 
     const infinitiModels = [
-
       "g37",
       "q50",
       "q60",
@@ -881,7 +306,6 @@ function understandSearch(query) {
       "qx60",
       "qx80",
       "fx35"
-
     ];
 
 
@@ -908,7 +332,6 @@ function understandSearch(query) {
     // Unsupported makes
 
     const unsupportedMakes = [
-
       "bmw",
       "audi",
       "mercedes",
@@ -938,7 +361,6 @@ function understandSearch(query) {
       "jaguar",
       "land rover",
       "range rover"
-
     ];
 
 
@@ -977,7 +399,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("overheat") ||
       text.includes("overheating") ||
@@ -995,7 +416,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("suspension") ||
       text.includes("shock") ||
@@ -1008,7 +428,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("steering")
     ) {
@@ -1017,7 +436,6 @@ function understandSearch(query) {
         "steering";
 
     }
-
 
     else if (
       text.includes("transmission") ||
@@ -1029,7 +447,6 @@ function understandSearch(query) {
 
     }
 
-
     else if (
       text.includes("brake")
     ) {
@@ -1038,7 +455,6 @@ function understandSearch(query) {
         "brakes";
 
     }
-
 
     else if (
       text.includes("check engine") ||
@@ -1051,7 +467,6 @@ function understandSearch(query) {
         "diagnostics";
 
     }
-
 
     else if (
       text.includes("engine")
@@ -1152,7 +567,6 @@ function scoreAutomotive(
 
     }
 
-
     else if (
       search.model === "g37" &&
       profile.models.includes("g")
@@ -1161,7 +575,6 @@ function scoreAutomotive(
       score += 2;
 
     }
-
 
     else {
 
@@ -1220,8 +633,6 @@ function scoreHomeService(
     profile.baseScore;
 
 
-  // Exact job evidence
-
   if (search.job) {
 
     if (
@@ -1243,8 +654,6 @@ function scoreHomeService(
   }
 
 
-  // Relevant surface evidence
-
   if (search.surface) {
 
     if (
@@ -1259,8 +668,6 @@ function scoreHomeService(
 
   }
 
-
-  // Location
 
   score +=
     calculateLocationScore(
@@ -1339,7 +746,7 @@ function trackEvent(
 
 
 // ==================================================
-// PERFORM SEARCH
+// SEARCH
 // ==================================================
 
 function performSearch() {
@@ -1404,7 +811,6 @@ function performSearch() {
 
 
         results.push({
-
           id:
             business.id,
 
@@ -1426,7 +832,6 @@ function performSearch() {
 
           matchLabel:
             getMatchLabel(score)
-
         });
 
       }
@@ -1461,7 +866,6 @@ function performSearch() {
 
 
         results.push({
-
           id:
             business.id,
 
@@ -1483,7 +887,6 @@ function performSearch() {
 
           matchLabel:
             getMatchLabel(score)
-
         });
 
       }
@@ -1498,14 +901,9 @@ function performSearch() {
   );
 
 
-  // ==================================================
-  // ANALYTICS — SEARCH
-  // ==================================================
-
   trackEvent(
     "stm_search",
     {
-
       vertical:
         understood.vertical ||
         "unknown",
@@ -1528,30 +926,8 @@ function performSearch() {
 
       result_count:
         results.length
-
     }
   );
-
-
-  if (
-    understood.unsupportedMake
-  ) {
-
-    trackEvent(
-      "stm_unsupported_vehicle",
-      {
-
-        vehicle_make:
-          understood.unsupportedMake,
-
-        job_type:
-          understood.job ||
-          "unknown"
-
-      }
-    );
-
-  }
 
 
   displayResults(
@@ -1563,13 +939,9 @@ function performSearch() {
 
   localStorage.setItem(
     "lastSearch",
-
     JSON.stringify({
-
       query,
-
       location
-
     })
   );
 
@@ -1685,17 +1057,11 @@ function displayResults(
     "";
 
 
-  // ==================================================
-  // UNSUPPORTED AUTOMOTIVE MAKE
-  // ==================================================
+  // Unsupported car make
 
   if (
     understood.unsupportedMake
   ) {
-
-    const make =
-      understood.unsupportedMake;
-
 
     resultsSummary.textContent =
       "No evidence-backed matches yet";
@@ -1707,7 +1073,8 @@ function displayResults(
 
         <h3>
           We're not ready to recommend
-          ${make.toUpperCase()} shops yet.
+          ${understood.unsupportedMake.toUpperCase()}
+          shops yet.
         </h3>
 
         <div class="why">
@@ -1729,6 +1096,19 @@ function displayResults(
     `;
 
 
+    trackEvent(
+      "stm_unsupported_vehicle",
+      {
+        vehicle_make:
+          understood.unsupportedMake,
+
+        job_type:
+          understood.job ||
+          "unknown"
+      }
+    );
+
+
     showResults();
 
     return;
@@ -1736,9 +1116,7 @@ function displayResults(
   }
 
 
-  // ==================================================
-  // AUTOMOTIVE BUT NO MAKE
-  // ==================================================
+  // Automotive without make
 
   if (
     understood.vertical ===
@@ -1766,11 +1144,7 @@ function displayResults(
           </strong>
 
           <p>
-            Include the make and model if you
-            know it.
-
-            For example:
-            "My 2011 Infiniti G37 is overheating."
+            Include the make and model if you know it.
           </p>
 
         </div>
@@ -1787,11 +1161,11 @@ function displayResults(
   }
 
 
-  // ==================================================
-  // UNKNOWN VERTICAL
-  // ==================================================
+  // Unknown vertical
 
-  if (!understood.vertical) {
+  if (
+    !understood.vertical
+  ) {
 
     resultsSummary.textContent =
       "We're still learning this type of job";
@@ -1815,9 +1189,6 @@ function displayResults(
             Seek The Master currently supports
             automotive repair and selected
             home-service searches.
-
-            More industries will be added as we
-            build evidence-backed business profiles.
           </p>
 
         </div>
@@ -1828,8 +1199,7 @@ function displayResults(
 
 
     trackEvent(
-      "stm_unsupported_vertical",
-      {}
+      "stm_unsupported_vertical"
     );
 
 
@@ -1839,10 +1209,6 @@ function displayResults(
 
   }
 
-
-  // ==================================================
-  // WHAT WE UNDERSTOOD
-  // ==================================================
 
   const understoodText =
     formatUnderstood(
@@ -1904,10 +1270,6 @@ function displayResults(
         : ""
     }`;
 
-
-  // ==================================================
-  // RESULT CARDS
-  // ==================================================
 
   results.forEach(
     (result, index) => {
@@ -2092,7 +1454,6 @@ function attachResultTracking(
             trackEvent(
               "stm_business_click",
               {
-
                 business_id:
                   link.dataset.businessId,
 
@@ -2110,7 +1471,6 @@ function attachResultTracking(
                 job_type:
                   understood.job ||
                   "unknown"
-
               }
             );
 
@@ -2135,7 +1495,6 @@ function attachResultTracking(
             trackEvent(
               "stm_evidence_click",
               {
-
                 business_id:
                   link.dataset.businessId,
 
@@ -2153,7 +1512,6 @@ function attachResultTracking(
                 job_type:
                   understood.job ||
                   "unknown"
-
               }
             );
 
@@ -2178,10 +1536,8 @@ function showResults() {
 
 
   resultsSection.scrollIntoView({
-
     behavior:
       "smooth"
-
   });
 
 }
@@ -2230,11 +1586,8 @@ document
 // ==================================================
 
 searchButton.addEventListener(
-
   "click",
-
   performSearch
-
 );
 
 
@@ -2243,9 +1596,7 @@ searchButton.addEventListener(
 // ==================================================
 
 searchInput.addEventListener(
-
   "keydown",
-
   event => {
 
     if (
@@ -2260,7 +1611,6 @@ searchInput.addEventListener(
     }
 
   }
-
 );
 
 
@@ -2292,7 +1642,6 @@ if (savedSearch) {
       previous.location || "";
 
   }
-
 
   catch (error) {
 

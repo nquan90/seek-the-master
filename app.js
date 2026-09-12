@@ -8,26 +8,23 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — V0.8
+// SEEK THE MASTER — V0.9
 // ==================================================
 //
-// Business data now lives in:
+// New in V0.9:
 //
-// data/automotive.js
-// data/home-services.js
-//
-// app.js is now responsible for:
-// - understanding the search
-// - routing by vertical
-// - scoring businesses
-// - displaying results
-// - analytics
+// - Per-result feedback controls
+// - 👍 Good match
+// - 👎 Bad match
+// - GA4 feedback events
+// - Prevents repeat feedback on the same result
+//   during the current browser session
 //
 // ==================================================
 
 
 // --------------------------------------------------
-// LOAD DATA FROM SEPARATE FILES
+// LOAD DATA
 // --------------------------------------------------
 
 const automotiveBusinesses =
@@ -242,8 +239,6 @@ function understandSearch(query) {
     "automotive"
   ) {
 
-    // Supported makes
-
     if (
       text.includes("porsche")
     ) {
@@ -263,8 +258,6 @@ function understandSearch(query) {
 
     }
 
-
-    // Porsche models
 
     const porscheModels = [
       "cayenne",
@@ -294,8 +287,6 @@ function understandSearch(query) {
 
     }
 
-
-    // Infiniti models
 
     const infinitiModels = [
       "g37",
@@ -328,8 +319,6 @@ function understandSearch(query) {
 
     }
 
-
-    // Unsupported makes
 
     const unsupportedMakes = [
       "bmw",
@@ -386,8 +375,6 @@ function understandSearch(query) {
 
     }
 
-
-    // Automotive job
 
     if (
       text.includes("water pump") ||
@@ -775,10 +762,6 @@ function performSearch() {
   let results = [];
 
 
-  // ==================================================
-  // AUTOMOTIVE
-  // ==================================================
-
   if (
     understood.vertical ===
     "automotive" &&
@@ -839,10 +822,6 @@ function performSearch() {
 
   }
 
-
-  // ==================================================
-  // HOME SERVICES
-  // ==================================================
 
   if (
     understood.vertical ===
@@ -1057,8 +1036,6 @@ function displayResults(
     "";
 
 
-  // Unsupported car make
-
   if (
     understood.unsupportedMake
   ) {
@@ -1116,8 +1093,6 @@ function displayResults(
   }
 
 
-  // Automotive without make
-
   if (
     understood.vertical ===
     "automotive" &&
@@ -1160,8 +1135,6 @@ function displayResults(
 
   }
 
-
-  // Unknown vertical
 
   if (
     !understood.vertical
@@ -1412,6 +1385,76 @@ function displayResults(
 
         </div>
 
+
+        <div
+          class="result-feedback"
+          style="
+            margin-top:20px;
+            padding-top:16px;
+            border-top:1px solid #deded8;
+          "
+        >
+
+          <div
+            style="
+              font-size:13px;
+              font-weight:700;
+              margin-bottom:10px;
+            "
+          >
+            Was this a good match?
+          </div>
+
+
+          <button
+            class="feedback-button feedback-positive"
+            data-business-id="${result.id}"
+            data-business-name="${result.name}"
+            data-rank="${index + 1}"
+            style="
+              border:1px solid #deded8;
+              background:white;
+              border-radius:8px;
+              padding:8px 12px;
+              cursor:pointer;
+              margin-right:6px;
+            "
+          >
+            👍 Good match
+          </button>
+
+
+          <button
+            class="feedback-button feedback-negative"
+            data-business-id="${result.id}"
+            data-business-name="${result.name}"
+            data-rank="${index + 1}"
+            style="
+              border:1px solid #deded8;
+              background:white;
+              border-radius:8px;
+              padding:8px 12px;
+              cursor:pointer;
+            "
+          >
+            👎 Bad match
+          </button>
+
+
+          <span
+            class="feedback-message"
+            style="
+              display:none;
+              margin-left:10px;
+              font-size:12px;
+              color:#686868;
+            "
+          >
+            Thanks for the feedback.
+          </span>
+
+        </div>
+
       `;
 
 
@@ -1423,6 +1466,11 @@ function displayResults(
 
 
   attachResultTracking(
+    understood
+  );
+
+
+  attachFeedbackTracking(
     understood
   );
 
@@ -1520,6 +1568,222 @@ function attachResultTracking(
 
       }
     );
+
+}
+
+
+// ==================================================
+// FEEDBACK TRACKING
+// ==================================================
+
+function attachFeedbackTracking(
+  understood
+) {
+
+  document
+    .querySelectorAll(
+      ".result-card"
+    )
+    .forEach(
+      card => {
+
+        const positiveButton =
+          card.querySelector(
+            ".feedback-positive"
+          );
+
+
+        const negativeButton =
+          card.querySelector(
+            ".feedback-negative"
+          );
+
+
+        const message =
+          card.querySelector(
+            ".feedback-message"
+          );
+
+
+        if (
+          !positiveButton ||
+          !negativeButton
+        ) {
+
+          return;
+
+        }
+
+
+        const businessId =
+          positiveButton.dataset.businessId;
+
+
+        const storageKey =
+          `stm_feedback_${businessId}`;
+
+
+        if (
+          sessionStorage.getItem(
+            storageKey
+          )
+        ) {
+
+          positiveButton.disabled =
+            true;
+
+          negativeButton.disabled =
+            true;
+
+          if (message) {
+
+            message.style.display =
+              "inline";
+
+          }
+
+        }
+
+
+        positiveButton.addEventListener(
+          "click",
+          () => {
+
+            submitFeedback(
+              "positive",
+              positiveButton,
+              negativeButton,
+              message,
+              understood
+            );
+
+          }
+        );
+
+
+        negativeButton.addEventListener(
+          "click",
+          () => {
+
+            submitFeedback(
+              "negative",
+              positiveButton,
+              negativeButton,
+              message,
+              understood
+            );
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+function submitFeedback(
+  type,
+  positiveButton,
+  negativeButton,
+  message,
+  understood
+) {
+
+  const businessId =
+    positiveButton.dataset.businessId;
+
+
+  const businessName =
+    positiveButton.dataset.businessName;
+
+
+  const resultRank =
+    Number(
+      positiveButton.dataset.rank
+    );
+
+
+  const storageKey =
+    `stm_feedback_${businessId}`;
+
+
+  if (
+    sessionStorage.getItem(
+      storageKey
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  sessionStorage.setItem(
+    storageKey,
+    type
+  );
+
+
+  positiveButton.disabled =
+    true;
+
+  negativeButton.disabled =
+    true;
+
+
+  positiveButton.style.opacity =
+    "0.55";
+
+  negativeButton.style.opacity =
+    "0.55";
+
+
+  if (message) {
+
+    message.style.display =
+      "inline";
+
+  }
+
+
+  trackEvent(
+    type === "positive"
+      ? "stm_result_positive"
+      : "stm_result_negative",
+    {
+
+      business_id:
+        businessId,
+
+      business_name:
+        businessName,
+
+      result_rank:
+        resultRank,
+
+      vertical:
+        understood.vertical ||
+        "unknown",
+
+      vehicle_make:
+        understood.make ||
+        "not_applicable",
+
+      vehicle_model:
+        understood.model ||
+        "not_applicable",
+
+      job_type:
+        understood.job ||
+        "unknown",
+
+      surface:
+        understood.surface ||
+        "not_applicable"
+
+    }
+  );
 
 }
 

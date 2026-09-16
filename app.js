@@ -8,17 +8,13 @@ const resultsSummary = document.getElementById("results-summary");
 
 
 // ==================================================
-// SEEK THE MASTER — V0.9
+// SEEK THE MASTER — V0.10
 // ==================================================
 //
-// New in V0.9:
-//
-// - Per-result feedback controls
-// - 👍 Good match
-// - 👎 Bad match
-// - GA4 feedback events
-// - Prevents repeat feedback on the same result
-//   during the current browser session
+// New:
+// - Detailed negative feedback
+// - Optional tester comment
+// - GA4 negative-feedback reason tracking
 //
 // ==================================================
 
@@ -52,9 +48,9 @@ function understandSearch(query) {
   };
 
 
-  // ==================================================
+  // --------------------------------------------------
   // HOME SERVICES
-  // ==================================================
+  // --------------------------------------------------
 
   const homeTerms = [
     "roof",
@@ -149,48 +145,28 @@ function understandSearch(query) {
     }
 
 
-    if (
-      text.includes("driveway")
-    ) {
-
-      search.surface =
-        "driveway";
-
+    if (text.includes("driveway")) {
+      search.surface = "driveway";
     }
 
-    else if (
-      text.includes("siding")
-    ) {
-
-      search.surface =
-        "siding";
-
+    else if (text.includes("siding")) {
+      search.surface = "siding";
     }
 
-    else if (
-      text.includes("patio")
-    ) {
-
-      search.surface =
-        "patio";
-
+    else if (text.includes("patio")) {
+      search.surface = "patio";
     }
 
-    else if (
-      text.includes("deck")
-    ) {
-
-      search.surface =
-        "deck";
-
+    else if (text.includes("deck")) {
+      search.surface = "deck";
     }
 
   }
 
 
-  // ==================================================
+  // --------------------------------------------------
   // AUTOMOTIVE
-  // ==================================================
+  // --------------------------------------------------
 
   if (
     search.vertical !==
@@ -239,23 +215,13 @@ function understandSearch(query) {
     "automotive"
   ) {
 
-    if (
-      text.includes("porsche")
-    ) {
-
-      search.make =
-        "porsche";
-
+    if (text.includes("porsche")) {
+      search.make = "porsche";
     }
 
 
-    if (
-      text.includes("infiniti")
-    ) {
-
-      search.make =
-        "infiniti";
-
+    if (text.includes("infiniti")) {
+      search.make = "infiniti";
     }
 
 
@@ -268,14 +234,9 @@ function understandSearch(query) {
     ];
 
 
-    for (
-      const model
-      of porscheModels
-    ) {
+    for (const model of porscheModels) {
 
-      if (
-        text.includes(model)
-      ) {
+      if (text.includes(model)) {
 
         search.make =
           "porsche";
@@ -300,14 +261,9 @@ function understandSearch(query) {
     ];
 
 
-    for (
-      const model
-      of infinitiModels
-    ) {
+    for (const model of infinitiModels) {
 
-      if (
-        text.includes(model)
-      ) {
+      if (text.includes(model)) {
 
         search.make =
           "infiniti";
@@ -355,14 +311,9 @@ function understandSearch(query) {
 
     if (!search.make) {
 
-      for (
-        const make
-        of unsupportedMakes
-      ) {
+      for (const make of unsupportedMakes) {
 
-        if (
-          text.includes(make)
-        ) {
+        if (text.includes(make)) {
 
           search.unsupportedMake =
             make;
@@ -482,9 +433,7 @@ function calculateLocationScore(
 ) {
 
   if (!location) {
-
     return 0;
-
   }
 
 
@@ -506,14 +455,12 @@ function calculateLocationScore(
   if (
     (
       text.includes("surrey") &&
-      business.city ===
-      "langley"
+      business.city === "langley"
     )
     ||
     (
       text.includes("langley") &&
-      business.city ===
-      "surrey"
+      business.city === "surrey"
     )
   ) {
 
@@ -675,25 +622,16 @@ function scoreHomeService(
 function getMatchLabel(score) {
 
   if (score >= 100) {
-
     return "Excellent match";
-
   }
-
 
   if (score >= 90) {
-
     return "Strong match";
-
   }
-
 
   if (score >= 80) {
-
     return "Possible match";
-
   }
-
 
   return "Limited evidence";
 
@@ -778,9 +716,7 @@ function performSearch() {
 
 
         if (!profile) {
-
           return;
-
         }
 
 
@@ -794,25 +730,13 @@ function performSearch() {
 
 
         results.push({
-          id:
-            business.id,
-
-          name:
-            business.name,
-
-          location:
-            business.location,
-
-          category:
-            business.category,
-
-          website:
-            business.website,
-
+          id: business.id,
+          name: business.name,
+          location: business.location,
+          category: business.category,
+          website: business.website,
           profile,
-
           score,
-
           matchLabel:
             getMatchLabel(score)
         });
@@ -845,25 +769,13 @@ function performSearch() {
 
 
         results.push({
-          id:
-            business.id,
-
-          name:
-            business.name,
-
-          location:
-            business.location,
-
-          category:
-            business.category,
-
-          website:
-            business.website,
-
+          id: business.id,
+          name: business.name,
+          location: business.location,
+          category: business.category,
+          website: business.website,
           profile,
-
           score,
-
           matchLabel:
             getMatchLabel(score)
         });
@@ -1386,8 +1298,11 @@ function displayResults(
         </div>
 
 
+        <!-- FEEDBACK -->
+
         <div
           class="result-feedback"
+          data-business-id="${result.id}"
           style="
             margin-top:20px;
             padding-top:16px;
@@ -1407,7 +1322,7 @@ function displayResults(
 
 
           <button
-            class="feedback-button feedback-positive"
+            class="feedback-positive"
             data-business-id="${result.id}"
             data-business-name="${result.name}"
             data-rank="${index + 1}"
@@ -1425,7 +1340,7 @@ function displayResults(
 
 
           <button
-            class="feedback-button feedback-negative"
+            class="feedback-negative"
             data-business-id="${result.id}"
             data-business-name="${result.name}"
             data-rank="${index + 1}"
@@ -1441,6 +1356,103 @@ function displayResults(
           </button>
 
 
+          <div
+            class="negative-feedback-panel"
+            style="
+              display:none;
+              margin-top:14px;
+              padding:14px;
+              background:#f7f7f5;
+              border-radius:10px;
+            "
+          >
+
+            <div
+              style="
+                font-size:13px;
+                font-weight:700;
+                margin-bottom:10px;
+              "
+            >
+              What felt wrong?
+            </div>
+
+
+            <select
+              class="feedback-reason"
+              style="
+                width:100%;
+                padding:10px;
+                border:1px solid #deded8;
+                border-radius:8px;
+                background:white;
+                margin-bottom:10px;
+              "
+            >
+              <option value="">
+                Choose a reason
+              </option>
+
+              <option value="wrong_specialty">
+                Wrong specialty
+              </option>
+
+              <option value="too_far">
+                Too far away
+              </option>
+
+              <option value="weak_evidence">
+                Not enough evidence
+              </option>
+
+              <option value="expected_other_business">
+                Expected a different business
+              </option>
+
+              <option value="other">
+                Other
+              </option>
+            </select>
+
+
+            <textarea
+              class="feedback-comment"
+              maxlength="250"
+              placeholder="Optional: tell us what you expected"
+              style="
+                width:100%;
+                min-height:70px;
+                padding:10px;
+                border:1px solid #deded8;
+                border-radius:8px;
+                resize:vertical;
+                font-family:inherit;
+              "
+            ></textarea>
+
+
+            <button
+              class="submit-negative-feedback"
+              data-business-id="${result.id}"
+              data-business-name="${result.name}"
+              data-rank="${index + 1}"
+              style="
+                margin-top:10px;
+                border:none;
+                background:#111;
+                color:white;
+                border-radius:8px;
+                padding:9px 14px;
+                font-weight:700;
+                cursor:pointer;
+              "
+            >
+              Send feedback
+            </button>
+
+          </div>
+
+
           <span
             class="feedback-message"
             style="
@@ -1450,7 +1462,7 @@ function displayResults(
               color:#686868;
             "
           >
-            Thanks for the feedback.
+            Thanks — this helps improve the ranking.
           </span>
 
         </div>
@@ -1573,7 +1585,7 @@ function attachResultTracking(
 
 
 // ==================================================
-// FEEDBACK TRACKING
+// FEEDBACK
 // ==================================================
 
 function attachFeedbackTracking(
@@ -1582,37 +1594,51 @@ function attachFeedbackTracking(
 
   document
     .querySelectorAll(
-      ".result-card"
+      ".result-feedback"
     )
     .forEach(
-      card => {
+      container => {
 
         const positiveButton =
-          card.querySelector(
+          container.querySelector(
             ".feedback-positive"
           );
 
 
         const negativeButton =
-          card.querySelector(
+          container.querySelector(
             ".feedback-negative"
           );
 
 
-        const message =
-          card.querySelector(
-            ".feedback-message"
+        const negativePanel =
+          container.querySelector(
+            ".negative-feedback-panel"
           );
 
 
-        if (
-          !positiveButton ||
-          !negativeButton
-        ) {
+        const submitNegative =
+          container.querySelector(
+            ".submit-negative-feedback"
+          );
 
-          return;
 
-        }
+        const reasonSelect =
+          container.querySelector(
+            ".feedback-reason"
+          );
+
+
+        const commentBox =
+          container.querySelector(
+            ".feedback-comment"
+          );
+
+
+        const message =
+          container.querySelector(
+            ".feedback-message"
+          );
 
 
         const businessId =
@@ -1622,6 +1648,8 @@ function attachFeedbackTracking(
         const storageKey =
           `stm_feedback_${businessId}`;
 
+
+        // Already rated in this session
 
         if (
           sessionStorage.getItem(
@@ -1635,43 +1663,251 @@ function attachFeedbackTracking(
           negativeButton.disabled =
             true;
 
-          if (message) {
+          positiveButton.style.opacity =
+            "0.55";
 
-            message.style.display =
-              "inline";
+          negativeButton.style.opacity =
+            "0.55";
 
-          }
+          message.style.display =
+            "inline";
 
         }
 
+
+        // Positive feedback
 
         positiveButton.addEventListener(
           "click",
           () => {
 
-            submitFeedback(
-              "positive",
+            if (
+              sessionStorage.getItem(
+                storageKey
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            sessionStorage.setItem(
+              storageKey,
+              "positive"
+            );
+
+
+            disableFeedbackButtons(
               positiveButton,
-              negativeButton,
-              message,
-              understood
+              negativeButton
+            );
+
+
+            message.style.display =
+              "inline";
+
+
+            trackEvent(
+              "stm_result_positive",
+              {
+                business_id:
+                  positiveButton.dataset.businessId,
+
+                business_name:
+                  positiveButton.dataset.businessName,
+
+                result_rank:
+                  Number(
+                    positiveButton.dataset.rank
+                  ),
+
+                vertical:
+                  understood.vertical ||
+                  "unknown",
+
+                vehicle_make:
+                  understood.make ||
+                  "not_applicable",
+
+                vehicle_model:
+                  understood.model ||
+                  "not_applicable",
+
+                job_type:
+                  understood.job ||
+                  "unknown",
+
+                surface:
+                  understood.surface ||
+                  "not_applicable"
+              }
             );
 
           }
         );
 
 
+        // Open negative panel
+
         negativeButton.addEventListener(
           "click",
           () => {
 
-            submitFeedback(
-              "negative",
-              positiveButton,
-              negativeButton,
-              message,
-              understood
+            if (
+              sessionStorage.getItem(
+                storageKey
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            negativePanel.style.display =
+              "block";
+
+          }
+        );
+
+
+        // Submit negative feedback
+
+        submitNegative.addEventListener(
+          "click",
+          () => {
+
+            if (
+              sessionStorage.getItem(
+                storageKey
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            const reason =
+              reasonSelect.value;
+
+
+            if (!reason) {
+
+              reasonSelect.focus();
+
+              return;
+
+            }
+
+
+            const comment =
+              commentBox.value
+                .trim()
+                .substring(
+                  0,
+                  250
+                );
+
+
+            sessionStorage.setItem(
+              storageKey,
+              "negative"
             );
+
+
+            disableFeedbackButtons(
+              positiveButton,
+              negativeButton
+            );
+
+
+            negativePanel.style.display =
+              "none";
+
+
+            message.style.display =
+              "inline";
+
+
+            trackEvent(
+              "stm_result_negative",
+              {
+                business_id:
+                  submitNegative.dataset.businessId,
+
+                business_name:
+                  submitNegative.dataset.businessName,
+
+                result_rank:
+                  Number(
+                    submitNegative.dataset.rank
+                  ),
+
+                vertical:
+                  understood.vertical ||
+                  "unknown",
+
+                job_type:
+                  understood.job ||
+                  "unknown"
+              }
+            );
+
+
+            trackEvent(
+              "stm_result_negative_detail",
+              {
+                business_id:
+                  submitNegative.dataset.businessId,
+
+                feedback_reason:
+                  reason,
+
+                has_comment:
+                  comment
+                    ? "yes"
+                    : "no",
+
+                vertical:
+                  understood.vertical ||
+                  "unknown",
+
+                vehicle_make:
+                  understood.make ||
+                  "not_applicable",
+
+                vehicle_model:
+                  understood.model ||
+                  "not_applicable",
+
+                job_type:
+                  understood.job ||
+                  "unknown",
+
+                surface:
+                  understood.surface ||
+                  "not_applicable"
+              }
+            );
+
+
+            // IMPORTANT:
+            // We intentionally do NOT send the
+            // free-text comment to Google Analytics.
+            //
+            // Later we'll store tester comments
+            // in our own backend/database.
+
+            if (comment) {
+
+              console.log(
+                "Tester comment:",
+                comment
+              );
+
+            }
 
           }
         );
@@ -1682,48 +1918,10 @@ function attachFeedbackTracking(
 }
 
 
-function submitFeedback(
-  type,
+function disableFeedbackButtons(
   positiveButton,
-  negativeButton,
-  message,
-  understood
+  negativeButton
 ) {
-
-  const businessId =
-    positiveButton.dataset.businessId;
-
-
-  const businessName =
-    positiveButton.dataset.businessName;
-
-
-  const resultRank =
-    Number(
-      positiveButton.dataset.rank
-    );
-
-
-  const storageKey =
-    `stm_feedback_${businessId}`;
-
-
-  if (
-    sessionStorage.getItem(
-      storageKey
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  sessionStorage.setItem(
-    storageKey,
-    type
-  );
-
 
   positiveButton.disabled =
     true;
@@ -1737,53 +1935,6 @@ function submitFeedback(
 
   negativeButton.style.opacity =
     "0.55";
-
-
-  if (message) {
-
-    message.style.display =
-      "inline";
-
-  }
-
-
-  trackEvent(
-    type === "positive"
-      ? "stm_result_positive"
-      : "stm_result_negative",
-    {
-
-      business_id:
-        businessId,
-
-      business_name:
-        businessName,
-
-      result_rank:
-        resultRank,
-
-      vertical:
-        understood.vertical ||
-        "unknown",
-
-      vehicle_make:
-        understood.make ||
-        "not_applicable",
-
-      vehicle_model:
-        understood.model ||
-        "not_applicable",
-
-      job_type:
-        understood.job ||
-        "unknown",
-
-      surface:
-        understood.surface ||
-        "not_applicable"
-
-    }
-  );
 
 }
 
